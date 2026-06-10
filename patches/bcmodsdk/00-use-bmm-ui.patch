@@ -96,3 +96,62 @@
 -export * from './api';
 +export * from './api';
 \ No newline at end of file
+--- a/patching.ts
++++ b/patching.ts
+@@ -5,6 +5,8 @@
+ import { registeredMods } from './modRegistry';
+ import { sdkApi } from './sdkApi';
+ import { ArrayUnique, CRC32, IsObject } from './utils';
++import { reportSdkCrash } from '@/service/SdkUiService';
++import { showSdkAlert } from '@/service/SdkUiService';
+ 
+ export interface IHookData {
+ 	readonly mod: string;
+@@ -94,9 +96,15 @@
+ 
+ 	let next: (this: any, nextargs: any[]) => any = function (args) {
+ 		const onExit = sdkApi.errorReporterHooks.hookChainExit?.(data.name, patchesSources);
+-		const resExit = final.apply(this, args);
+-		onExit?.();
+-		return resExit;
++		try {
++			const resExit = final.apply(this, args);
++			onExit?.();
++			return resExit;
++		} catch (err) {
++			const modList = Array.from(patchesSources).join(', ') || '(unknown)';
++			reportSdkCrash('patch', data.name, modList, err);
++			throw err;
++		}
+ 	};
+ 
+ 	for (let i = hooks.length - 1; i >= 0; i--) {
+@@ -105,14 +113,20 @@
+ 
+ 		next = function (args) {
+ 			const onExit = sdkApi.errorReporterHooks.hookEnter?.(data.name, hook.mod);
+-			const resIntermediate = hook.hook.apply(this, [args, (nextargs) => {
+-				if (arguments.length !== 1 || !Array.isArray(args)) {
+-					throw new Error(`Mod ${hook.mod} failed to call next hook: Expected args to be array, got ${typeof nextargs}`);
+-				}
+-				return nextHook.call(this, nextargs);
+-			}]);
+-			onExit?.();
+-			return resIntermediate;
++			try {
++				const resIntermediate = hook.hook.apply(this, [args, (nextargs) => {
++					if (arguments.length !== 1 || !Array.isArray(args)) {
++						throw new Error(`Mod ${hook.mod} failed to call next hook: Expected args to be array, got ${typeof nextargs}`);
++					}
++					return nextHook.call(this, nextargs);
++				}]);
++				onExit?.();
++				return resIntermediate;
++			} catch (err) {
++				onExit?.();
++				reportSdkCrash('hook', data.name, hook.mod, err);
++				throw err;
++			}
+ 		};
+ 	}
+ 
