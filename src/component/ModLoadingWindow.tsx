@@ -23,20 +23,26 @@ interface ModLoadingWindowState {
   sdkHijacked: boolean;       // BC's SDK initialized before ours with mods already registered
   sdkHijackedCount: number;
   dismissed: boolean;
+  onLoginScreen: boolean;     // still on the BC login screen
 }
 
-const STATUS_STYLES: Record<ModLoadStatus, string> = {
-  pending: 'border-bmm-border bg-bmm-surface-muted text-bmm-muted',
-  loading: 'border-blue-200 bg-bmm-accent-soft text-bmm-accent-strong',
-  loaded: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  error: 'border-red-200 bg-red-50 text-red-700',
+function isLoginScreen(): boolean {
+  return typeof CurrentScreen === 'undefined' || CurrentScreen === 'Login';
+}
+
+const STATUS_DOT: Record<ModLoadStatus, string> = {
+  pending: 'bg-bmm-border',
+  loading: 'bg-bmm-accent',
+  loaded: 'bg-emerald-500',
+  error: 'bg-red-500',
 };
 
-const STATUS_LABEL_KEY: Record<ModLoadStatus, string> = {
-  pending: 'loading-status-pending',
-  loading: 'loading-status-loading',
-  loaded: 'loading-status-loaded',
-  error: 'loading-status-error',
+// Lower number = shown first
+const STATUS_SORT: Record<ModLoadStatus, number> = {
+  error: 0,
+  loading: 1,
+  pending: 2,
+  loaded: 3,
 };
 
 /**
@@ -50,6 +56,7 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
   private unsubscribeSdkState?: () => void;
   private hideTimer: number | null = null;
   private safetyTimer: number | null = null;
+  private screenTimer: number | null = null;
 
   constructor(props: {}) {
     super(props);
@@ -61,6 +68,7 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
       sdkHijacked: SdkStateService.isHijacked(),
       sdkHijackedCount: SdkStateService.getHijackInfo()?.registeredMods.length ?? 0,
       dismissed: false,
+      onLoginScreen: isLoginScreen(),
     };
   }
 
@@ -104,6 +112,18 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
 
     this.scheduleAutoHide(this.state.progress.finished);
 
+    // Poll CurrentScreen so we can defer auto-hide until the player has left
+    // the login screen.
+    this.screenTimer = window.setInterval(() => {
+      const onLoginScreen = isLoginScreen();
+      if (onLoginScreen !== this.state.onLoginScreen) {
+        this.setState({onLoginScreen});
+        if (!onLoginScreen) {
+          this.scheduleAutoHide(this.state.progress.finished);
+        }
+      }
+    }, 500);
+
     this.safetyTimer = window.setTimeout(() => {
       this.safetyTimer = null;
       if (!this.anyOutdated()) {
@@ -121,6 +141,10 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
     if (this.safetyTimer !== null) {
       clearTimeout(this.safetyTimer);
       this.safetyTimer = null;
+    }
+    if (this.screenTimer !== null) {
+      clearInterval(this.screenTimer);
+      this.screenTimer = null;
     }
   }
 
@@ -225,30 +249,39 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
             )}
 
             {progress.total > 0 && (
-              <ul className="m-0 mt-3 flex max-h-52 list-none flex-col gap-1 overflow-y-auto p-0 pr-0.5">
-                {progress.entries.map(entry => (
-                  <li
-                    key={entry.modKey}
-                    className="rounded-md px-2 py-1.5 text-xs hover:bg-bmm-surface-muted"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="truncate text-bmm-ink" title={entry.name}>{entry.name}</span>
-                      <div className="flex shrink-0 items-center gap-1.5">
-                        {entry.durationMs !== undefined && (entry.status === 'loaded' || entry.status === 'error') && (
-                          <span className="tabular-nums text-[0.6875rem] text-bmm-faint">
-                            {formatDuration(entry.durationMs)}
-                          </span>
+              <ul className="m-0 mt-2 flex max-h-52 list-none flex-col overflow-y-auto p-0 pr-0.5">
+                {[...progress.entries]
+                  .sort((a, b) => STATUS_SORT[a.status] - STATUS_SORT[b.status])
+                  .map(entry => (
+                    <li
+                      key={entry.modKey}
+                      className="flex min-w-0 items-baseline gap-1.5 px-1 py-[2px] text-[0.6875rem] hover:bg-bmm-surface-muted rounded"
+                    >
+                      <span className={classNames(
+                        'mt-[3px] h-1.5 w-1.5 shrink-0 rounded-full',
+                        STATUS_DOT[entry.status],
+                        entry.status === 'loading' && 'animate-pulse',
+                      )}/>
+                      <span
+                        className={classNames(
+                          'min-w-0 truncate',
+                          entry.status === 'loaded' ? 'text-bmm-muted' : 'text-bmm-ink',
+                          entry.status === 'error' && 'font-semibold text-red-700',
                         )}
-                        {this.renderStatusBadge(entry.status)}
-                      </div>
-                    </div>
-                    {entry.status === 'error' && entry.error && (
-                      <p className="m-0 mt-1 line-clamp-2 text-[0.6875rem] leading-4 text-red-600" title={entry.error}>
-                        {entry.error}
-                      </p>
-                    )}
-                  </li>
-                ))}
+                        title={entry.name}
+                      >{entry.name}</span>
+                      {entry.status === 'error' && entry.error && (
+                        <span className="shrink-0 truncate text-red-500" title={entry.error}>
+                          — {entry.error}
+                        </span>
+                      )}
+                      {entry.durationMs !== undefined && entry.status !== 'error' && (
+                        <span className="ml-auto shrink-0 tabular-nums text-bmm-faint">
+                          {formatDuration(entry.durationMs)}
+                        </span>
+                      )}
+                    </li>
+                  ))}
               </ul>
             )}
           </div>
@@ -258,7 +291,7 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
   }
 
   private scheduleAutoHide(finished: boolean) {
-    if (finished && this.hideTimer === null && !this.anyOutdated()) {
+    if (finished && !this.state.onLoginScreen && this.hideTimer === null && !this.anyOutdated()) {
       this.hideTimer = window.setTimeout(() => {
         this.hideTimer = null;
         this.setState({dismissed: true});
@@ -307,17 +340,4 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
     return i18n('loading-in-progress');
   }
 
-  private renderStatusBadge(status: ModLoadStatus) {
-    return (
-      <span
-        className={classNames(
-          'inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-[0.6875rem] font-bold leading-none',
-          STATUS_STYLES[status],
-        )}
-      >
-        {status === 'loading' && <Icon name="refresh" spin/>}
-        {i18n(STATUS_LABEL_KEY[status])}
-      </span>
-    );
-  }
 }

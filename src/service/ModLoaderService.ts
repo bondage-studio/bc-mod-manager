@@ -18,6 +18,7 @@ export class ModLoaderService {
   private static hasDisabledMods: boolean = false;
   private static scheduledPreload: number | null = null;
   private static scheduledLoad: number | null = null;
+  private static characterEnterHookInstalled: boolean = false;
   private static loadProgress: Map<string, ModLoadEntry> = new Map();
   private static loadStarted: boolean = false;
   private static waitingForGame: boolean = false;
@@ -71,15 +72,62 @@ export class ModLoaderService {
     } else if (!this.scheduledLoad) {
       this.waitingForGame = true;
       this.notifyProgress();
+
+      // Hook CharacterEnter via bcModSdk when available — fires once the player
+      // has fully logged in, which is more reliable than polling Player directly.
+      this.installCharacterEnterHook();
+
       this.scheduledLoad = setInterval(() => {
         if (typeof Player !== "undefined" && !!Player) {
-          clearInterval(this.scheduledLoad!);
-          this.scheduledLoad = null;
-          this.waitingForGame = false;
-          this.notifyProgress();
-          this.loadAllEnabledModsImpl();
+          this.onGameReady();
         }
       }, 5);
+    }
+  }
+
+  /**
+   * Force-start mod loading immediately, bypassing the waitingForGame check.
+   * Called when the user clicks "Load now" in the loading window.
+   */
+  static forceLoad(): void {
+    if (!this.waitingForGame) {
+      return;
+    }
+    Logger.info('ModLoaderService: User triggered force load');
+    this.onGameReady();
+  }
+
+  private static onGameReady(): void {
+    if (this.scheduledLoad !== null) {
+      clearInterval(this.scheduledLoad);
+      this.scheduledLoad = null;
+    }
+    this.waitingForGame = false;
+    this.notifyProgress();
+    this.loadAllEnabledModsImpl();
+  }
+
+  private static installCharacterEnterHook(): void {
+    if (this.characterEnterHookInstalled) {
+      return;
+    }
+    const sdk = (window as any).bcModSdk;
+    if (!sdk || typeof sdk.hookFunction !== 'function') {
+      return;
+    }
+    try {
+      this.characterEnterHookInstalled = true;
+      sdk.hookFunction('CharacterEnter', 0, (args: unknown[], next: (...a: unknown[]) => unknown) => {
+        const result = next(args);
+        if (this.waitingForGame) {
+          Logger.info('ModLoaderService: CharacterEnter fired — starting mod load');
+          this.onGameReady();
+        }
+        return result;
+      });
+      Logger.debug('ModLoaderService: CharacterEnter hook installed');
+    } catch (err) {
+      Logger.warn('ModLoaderService: Failed to install CharacterEnter hook', err);
     }
   }
 
