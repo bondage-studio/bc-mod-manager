@@ -1,5 +1,5 @@
 import type {ComponentChildren, JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 interface AppShellProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'class' | 'className'> {
   children: ComponentChildren;
@@ -10,7 +10,7 @@ export default function AppShell({children, className, ...props}: AppShellProps)
   return (
     <div
       {...props}
-      className={classNames(
+      className={cn(
         'relative flex w-[min(94vw,1200px)] max-h-[min(92vh,900px)] flex-col overflow-hidden rounded-lg border border-white/70 bg-bmm-canvas shadow-bmm-panel ring-1 ring-slate-950/5 max-[720px]:h-screen max-[720px]:max-h-screen max-[720px]:w-screen max-[720px]:rounded-none',
         className,
       )}

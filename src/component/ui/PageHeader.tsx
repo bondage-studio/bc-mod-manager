@@ -1,5 +1,5 @@
 import type {ComponentChildren, JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 interface PageHeaderProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'class' | 'className' | 'title'> {
   actions?: ComponentChildren;
@@ -12,7 +12,7 @@ export default function PageHeader({actions, className, subtitle, title, ...prop
   return (
     <div
       {...props}
-      className={classNames(
+      className={cn(
         'mb-5 flex flex-col gap-4 pr-0 sm:flex-row sm:items-start sm:justify-between sm:pr-12',
         className,
       )}

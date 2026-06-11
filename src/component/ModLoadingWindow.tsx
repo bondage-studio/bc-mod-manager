@@ -1,6 +1,6 @@
 import {Component} from "preact";
 import i18n from "@/i18n/i18n.ts";
-import classNames from "@/component/ui/classNames.ts";
+import cn from "@/util/cn.ts";
 import Icon from "@/component/ui/Icon.tsx";
 import {ModLoaderService} from "@/service/ModLoaderService.ts";
 import {ModCacheService} from "@/service/ModCacheService.ts";
@@ -236,7 +236,7 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
             {progress.total > 0 && (
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-bmm-surface-muted">
                 <div
-                  className={classNames(
+                  className={cn(
                     'h-full rounded-full transition-[width] duration-300',
                     progress.errored > 0 ? 'bg-amber-400' : 'bg-bmm-accent',
                   )}
@@ -254,13 +254,13 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
                       key={entry.modKey}
                       className="flex min-w-0 items-baseline gap-1.5 px-1 py-[2px] text-[0.6875rem] hover:bg-bmm-surface-muted rounded"
                     >
-                      <span className={classNames(
+                      <span className={cn(
                         'mt-[3px] h-1.5 w-1.5 shrink-0 rounded-full',
                         STATUS_DOT[entry.status],
                         entry.status === 'loading' && 'animate-pulse',
                       )}/>
                       <span
-                        className={classNames(
+                        className={cn(
                           'min-w-0 truncate',
                           entry.status === 'loaded' ? 'text-bmm-muted' : 'text-bmm-ink',
                           entry.status === 'error' && 'font-semibold text-red-700',

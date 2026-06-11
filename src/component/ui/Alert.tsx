@@ -1,5 +1,5 @@
 import type {ComponentChildren, JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 type AlertVariant = 'danger' | 'success';
 
@@ -18,7 +18,7 @@ export default function Alert({children, className, variant = 'danger', ...props
   return (
     <div
       {...props}
-      className={classNames('mb-4 rounded-lg border px-3.5 py-3 text-sm font-semibold shadow-bmm-control', variantClass, className)}
+      className={cn('mb-4 rounded-lg border px-3.5 py-3 text-sm font-semibold shadow-bmm-control', variantClass, className)}
     >
       {children}
     </div>

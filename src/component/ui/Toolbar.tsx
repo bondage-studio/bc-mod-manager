@@ -1,5 +1,5 @@
 import type {ComponentChildren, JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 interface ToolbarProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'class' | 'className'> {
   children: ComponentChildren;
@@ -11,7 +11,7 @@ export default function Toolbar({children, className, inline = false, ...props}:
   return (
     <div
       {...props}
-      className={classNames(
+      className={cn(
         inline
           ? 'flex flex-wrap items-center gap-2.5'
           : 'mt-4 flex flex-wrap items-center gap-2.5 rounded-lg border border-bmm-border bg-bmm-surface p-3 shadow-bmm-card first:mt-0',

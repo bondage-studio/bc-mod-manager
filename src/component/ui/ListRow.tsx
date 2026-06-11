@@ -1,5 +1,5 @@
 import type {ComponentChildren, JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 interface ListRowProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'class' | 'className'> {
   children: ComponentChildren;
@@ -9,7 +9,7 @@ interface ListRowProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'class' 
 export default function ListRow({children, className, ...props}: ListRowProps) {
   return (
     <div {...props}
-         className={classNames('border-t border-bmm-border px-4 py-4 transition-colors first:border-t-0 hover:bg-bmm-surface-muted', className)}>
+         className={cn('border-t border-bmm-border px-4 py-4 transition-colors first:border-t-0 hover:bg-bmm-surface-muted', className)}>
       {children}
     </div>
   );

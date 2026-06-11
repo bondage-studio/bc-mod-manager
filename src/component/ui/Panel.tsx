@@ -1,5 +1,5 @@
 import type {ComponentChildren, JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 interface PanelProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'class' | 'className' | 'title'> {
   actions?: ComponentChildren;
@@ -13,7 +13,7 @@ interface PanelProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'class' | 
 export default function Panel({actions, body = false, children, className, list = false, title, ...props}: PanelProps) {
   return (
     <div {...props}
-         className={classNames('mt-4 overflow-hidden rounded-lg border border-bmm-border bg-bmm-surface shadow-bmm-card first:mt-0', className)}>
+         className={cn('mt-4 overflow-hidden rounded-lg border border-bmm-border bg-bmm-surface shadow-bmm-card first:mt-0', className)}>
       {(title || actions) && (
         <div
           className="flex flex-col gap-3 border-b border-bmm-border bg-bmm-surface-raised px-4 py-3 sm:flex-row sm:items-center sm:justify-between">

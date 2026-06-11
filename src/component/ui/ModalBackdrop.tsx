@@ -1,5 +1,5 @@
 import type {ComponentChildren, JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 interface ModalBackdropProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'class' | 'className'> {
   children: ComponentChildren;
@@ -9,7 +9,7 @@ interface ModalBackdropProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'c
 export default function ModalBackdrop({children, className, ...props}: ModalBackdropProps) {
   return (
     <div {...props}
-         className={classNames('fixed inset-0 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-[2px]', className)}>
+         className={cn('fixed inset-0 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-[2px]', className)}>
       {children}
     </div>
   );

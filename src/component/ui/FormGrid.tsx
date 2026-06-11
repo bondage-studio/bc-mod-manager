@@ -1,5 +1,5 @@
 import type {ComponentChildren, JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 interface FormGridProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'class' | 'className'> {
   children: ComponentChildren;
@@ -8,7 +8,7 @@ interface FormGridProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'class'
 
 export default function FormGrid({children, className, ...props}: FormGridProps) {
   return (
-    <div {...props} className={classNames('grid grid-cols-1 gap-4 md:grid-cols-2', className)}>
+    <div {...props} className={cn('grid grid-cols-1 gap-4 md:grid-cols-2', className)}>
       {children}
     </div>
   );

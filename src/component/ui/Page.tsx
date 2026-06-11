@@ -1,5 +1,5 @@
 import type {ComponentChildren, JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 type PageSize = 'narrow' | 'wide' | 'xl';
 
@@ -18,7 +18,7 @@ export default function Page({children, className, size = 'wide', ...props}: Pag
 
   return (
     <div {...props}
-         className={classNames('mx-auto min-h-0 w-full overflow-auto px-4 py-5 sm:px-6 sm:py-6', sizeClass, className)}>
+         className={cn('mx-auto min-h-0 w-full overflow-auto px-4 py-5 sm:px-6 sm:py-6', sizeClass, className)}>
       {children}
     </div>
   );

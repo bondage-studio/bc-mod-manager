@@ -1,5 +1,5 @@
 import type {JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, 'class' | 'className'> {
   className?: string;
@@ -15,7 +15,7 @@ export default function Input({className, compact = false, ...props}: InputProps
   return (
     <input
       {...props}
-      className={classNames(
+      className={cn(
         !hasWidthClass && 'w-full',
         'rounded-lg border border-bmm-border-strong bg-bmm-surface text-bmm-ink shadow-bmm-control transition-[background,border-color,box-shadow] duration-150 placeholder:text-bmm-faint hover:border-bmm-accent/45 focus:border-bmm-accent focus:bg-white focus:outline-none focus:ring-2 focus:ring-bmm-accent/15',
         sizeClass,

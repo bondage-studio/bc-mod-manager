@@ -1,5 +1,5 @@
 import type {JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 export type IconName = 'refresh' | 'download' | 'delete' | 'chevron';
 
@@ -22,7 +22,7 @@ export default function Icon({className, name, open = false, spin = false, ...pr
     <span
       {...props}
       aria-hidden="true"
-      className={classNames(
+      className={cn(
         'inline-flex w-[1em] items-center justify-center text-[0.95em] leading-none text-current',
         name === 'chevron' && open && 'rotate-90',
         spin && 'animate-spin',

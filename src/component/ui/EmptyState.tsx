@@ -1,5 +1,5 @@
 import type {ComponentChildren, JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 interface EmptyStateProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'class' | 'className' | 'title'> {
   children?: ComponentChildren;
@@ -10,7 +10,7 @@ interface EmptyStateProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'clas
 
 export default function EmptyState({children, className, description, title, ...props}: EmptyStateProps) {
   return (
-    <div {...props} className={classNames('px-4 py-12 text-center text-bmm-muted', className)}>
+    <div {...props} className={cn('px-4 py-12 text-center text-bmm-muted', className)}>
       <div className="text-base font-bold text-bmm-ink">{title}</div>
       {description && <div className="mt-1.5 text-sm leading-6">{description}</div>}
       {children}

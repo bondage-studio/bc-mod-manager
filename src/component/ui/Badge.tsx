@@ -1,5 +1,5 @@
 import type {ComponentChildren, JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 export type BadgeVariant = 'neutral' | 'primary' | 'success' | 'warning' | 'danger';
 
@@ -21,7 +21,7 @@ export default function Badge({children, className, variant = 'neutral', ...prop
   return (
     <span
       {...props}
-      className={classNames(
+      className={cn(
         'inline-flex items-center whitespace-nowrap rounded-full border px-2 py-1 text-[0.71875rem] font-bold leading-none shadow-[0_1px_0_rgb(15_23_42/0.04)]',
         variantClass,
         className,

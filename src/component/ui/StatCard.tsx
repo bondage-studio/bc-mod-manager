@@ -1,5 +1,5 @@
 import type {ComponentChildren, JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 type StatCardVariant = 'primary' | 'success' | 'neutral' | 'warning' | 'danger';
 
@@ -21,7 +21,7 @@ export default function StatCard({className, label, value, variant = 'neutral', 
 
   return (
     <div {...props}
-         className={classNames('rounded-lg border border-l-4 px-4 py-3 shadow-bmm-control', variantClass, className)}>
+         className={cn('rounded-lg border border-l-4 px-4 py-3 shadow-bmm-control', variantClass, className)}>
       <div className="text-2xl font-bold leading-none tracking-normal text-bmm-ink">{value}</div>
       <div className="mt-1.5 text-[0.8125rem] font-semibold text-bmm-muted">{label}</div>
     </div>

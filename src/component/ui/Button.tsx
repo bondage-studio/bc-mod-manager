@@ -1,5 +1,5 @@
 import type {ComponentChildren, JSX} from 'preact';
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 export type ButtonVariant = 'primary' | 'neutral' | 'danger' | 'success' | 'ghost';
 export type ButtonSize = 'md' | 'sm';
@@ -36,7 +36,7 @@ export default function Button({
     <button
       {...props}
       type={type}
-      className={classNames(
+      className={cn(
         'inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border text-center font-bold leading-tight tracking-normal transition-[background,border-color,color,transform] duration-150 hover:-translate-y-px active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmm-accent/25 focus-visible:ring-offset-2',
         variantClass,

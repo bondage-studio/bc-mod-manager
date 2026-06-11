@@ -1,4 +1,4 @@
-import classNames from '@/component/ui/classNames';
+import cn from '@/util/cn.ts';
 
 interface ToggleProps {
   checked: boolean;
@@ -21,7 +21,7 @@ export default function Toggle({checked, onChange, disabled, label, id}: ToggleP
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={classNames(
+      className={cn(
         'relative inline-flex h-6 w-11 flex-none items-center rounded-full border transition-colors duration-200',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bmm-accent/30 focus-visible:ring-offset-2',
         'disabled:cursor-not-allowed disabled:opacity-60',
@@ -29,7 +29,7 @@ export default function Toggle({checked, onChange, disabled, label, id}: ToggleP
       )}
     >
       <span
-        className={classNames(
+        className={cn(
           'inline-block h-4 w-4 transform rounded-full bg-white shadow-bmm-control transition-transform duration-200',
           checked ? 'translate-x-[1.375rem]' : 'translate-x-[0.1875rem]',
         )}
