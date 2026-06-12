@@ -5,7 +5,14 @@ import type {ModConfig} from "@/domain/Mod";
 import type {FusamAddon} from "@/domain/Registry";
 import type {ModLoadEntry, ModLoadStatus} from "@/domain/ModLoad";
 import {currentLanguage, t} from "@/i18n/i18n.ts";
-import {formatDuration, formatInitial, formatLocalizedName, formatSearchText} from "@/util/format.ts";
+import {
+  formatDuration,
+  formatInitial,
+  formatLocalizedName,
+  formatLocalizedText,
+  formatSearchText,
+  localizedTextSearchValues,
+} from "@/util/format.ts";
 import CustomExtensionModal from "@/component/CustomExtensionModal";
 import Alert from "@/component/ui/Alert";
 import Badge, {type BadgeVariant} from "@/component/ui/Badge";
@@ -235,7 +242,7 @@ export default class ModManagerPage extends Component<{}, ModManagerState> {
           : Object.values(m.addon.name);
         const searchableText = formatSearchText([
           ...localizedNames,
-          m.addon.description,
+          ...localizedTextSearchValues(m.addon.description),
           m.addon.author,
           m.addon.id,
           m.registryUrl,
@@ -394,6 +401,7 @@ export default class ModManagerPage extends Component<{}, ModManagerState> {
                 const isEnabled = mod.config?.enabled || false;
                 const uniqueId = `${mod.addon.id}_${mod.registryId}`;
                 const modName = formatLocalizedName(mod.addon.name, currentLanguage());
+                const modDescription = formatLocalizedText(mod.addon.description, currentLanguage());
                 const modInitial = formatInitial(modName);
 
                 // Get selected version: from config if installed, from pendingVersions if not, or default
@@ -473,9 +481,9 @@ export default class ModManagerPage extends Component<{}, ModManagerState> {
                           )}
                         </div>
 
-                        {mod.addon.description && (
+                        {modDescription && (
                           <p className="mt-0.5 truncate text-xs leading-4 text-bmm-muted">
-                            {mod.addon.description}
+                            {modDescription}
                           </p>
                         )}
                       </div>
@@ -520,9 +528,9 @@ export default class ModManagerPage extends Component<{}, ModManagerState> {
 
                     {isExpanded && (
                       <div className="mt-2 border-t border-bmm-border/70 pt-2 text-xs leading-5 text-bmm-muted">
-                        {mod.addon.description && (
+                        {modDescription && (
                           <p className="mb-2 text-bmm-ink">
-                            {mod.addon.description}
+                            {modDescription}
                           </p>
                         )}
 

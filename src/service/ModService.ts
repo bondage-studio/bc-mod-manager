@@ -2,6 +2,8 @@ import {ModConfigRepository} from '@/repository/ModConfigRepository';
 import {RegistryDataService} from '@/service/RegistryDataService';
 import {ModLoaderService} from '@/service/ModLoaderService';
 import {CustomExtensionService} from '@/service/CustomExtensionService';
+import {currentLanguage} from '@/i18n/i18n';
+import {formatLocalizedName, formatLocalizedText} from '@/util/format';
 import type {ModConfig, ModWithDetails} from '@/domain/Mod';
 import type {CachedRegistryData, FusamAddon} from '@/domain/Registry';
 
@@ -117,9 +119,10 @@ export class ModService {
 
           modsWithDetails.push({
             ...config,
-            name: addon.name,
+            name: formatLocalizedName(addon.name, currentLanguage()),
             nameLanguage: {en: addon.name},
-            description: addon.description,
+            description: formatLocalizedText(addon.description, currentLanguage()),
+            descriptionLanguage: typeof addon.description === 'object' ? addon.description : {en: addon.description},
             author: addon.author,
             repository: addon.repository,
             tags: addon.tags,
@@ -152,9 +155,10 @@ export class ModService {
 
           modsWithDetails.push({
             ...config,
-            name: typeof addon.name === 'string' ? addon.name : addon.name['en'],
+            name: formatLocalizedName(addon.name, currentLanguage()),
             nameLanguage: typeof addon.name === 'object' ? addon.name : {en: addon.name},
-            description: addon.description,
+            description: formatLocalizedText(addon.description, currentLanguage()),
+            descriptionLanguage: typeof addon.description === 'object' ? addon.description : {en: addon.description},
             author: addon.author,
             repository: addon.repository,
             tags: addon.tags,

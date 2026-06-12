@@ -8,18 +8,36 @@ export function formatDuration(ms: number): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-export function formatLocalizedName(
-  name: string | Record<string, string>,
+export type LocalizedText = string | Record<string, string>;
+
+export function formatLocalizedText(
+  value: LocalizedText | undefined,
   language: string,
-  fallback = 'Unknown Mod',
+  fallback = '',
 ): string {
-  if (typeof name === 'string') {
-    return name || fallback;
+  if (typeof value === 'string') {
+    return value || fallback;
+  }
+
+  if (!value) {
+    return fallback;
   }
 
   const normalizedLanguage = language.toLowerCase();
-  const matchedLanguage = Object.keys(name).find(key => key.toLowerCase() === normalizedLanguage);
-  return name[language] || (matchedLanguage ? name[matchedLanguage] : undefined) || name.en || Object.values(name)[0] || fallback;
+  const matchedLanguage = Object.keys(value).find(key => key.toLowerCase() === normalizedLanguage);
+  return value[language]
+    || (matchedLanguage ? value[matchedLanguage] : undefined)
+    || value.en
+    || Object.values(value)[0]
+    || fallback;
+}
+
+export function formatLocalizedName(
+  name: LocalizedText,
+  language: string,
+  fallback = 'Unknown Mod',
+): string {
+  return formatLocalizedText(name, language, fallback);
 }
 
 export function formatInitial(value: string, fallback = 'M'): string {
@@ -31,6 +49,14 @@ export function formatSearchText(values: Array<string | null | undefined>): stri
     .filter(Boolean)
     .join(' ')
     .toLowerCase();
+}
+
+export function localizedTextSearchValues(value: LocalizedText | undefined): string[] {
+  if (!value) {
+    return [];
+  }
+
+  return typeof value === 'string' ? [value] : Object.values(value);
 }
 
 /**

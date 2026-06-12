@@ -22,7 +22,7 @@ export interface Registry {
 export interface FusamAddon {
   id: string;
   name: string | Record<string, string>;
-  description: string;
+  description: string | Record<string, string>;
   author: string;
   repository?: string;
   tags?: string[];

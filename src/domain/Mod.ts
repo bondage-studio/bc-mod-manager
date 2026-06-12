@@ -17,6 +17,7 @@ export interface ModConfig {
 export interface ModWithDetails extends ModConfig {
   name: string;
   nameLanguage?: Record<string, string>;
+  descriptionLanguage?: Record<string, string>;
   description: string;
   author: string;
   repository?: string;
