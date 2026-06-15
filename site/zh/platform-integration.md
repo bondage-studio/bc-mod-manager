@@ -85,6 +85,47 @@ window.__bmmHost = {
 交给 `onReady` 的 API 与发给 `onEvent` 的事件，与插件使用的是完全相同的接口面 ——
 完整的方法与事件参考见[插件 API](plugin-api)。
 
+## 获取 Mod SDK
+
+BMM 拥有并初始化 [BC Mod SDK](https://github.com/Jomshir98/bondage-club-mod-sdk)，
+并将其发布为 `window.bcModSdk`。若宿主想注册自己的 hook 或 patch，应通过交给
+`onReady` 的 API 获取 SDK，而**不要**直接读取该全局变量 —— `onReady` 在 BMM 解决了与
+BC 自带 SDK 的竞争之后才触发，并保证该实例是权威实例：
+
+```js
+window.__bmmHost = {
+  platform: { id: "studio-bondage-club", name: "Studio Bondage Club" },
+  onReady(api) {
+    if (api.sdk.isHijacked()) {
+      console.warn("BC 自带的 SDK 赢得了竞争；诊断能力受限");
+    }
+
+    // 用同一个 SDK 实例注册宿主自己的 mod。
+    const mod = api.sdk.registerMod({
+      name: "StudioHost",
+      fullName: "Studio Bondage Club host",
+      version: "1.4.2",
+    });
+    mod?.hookFunction("ServerSend", 1, (args, next) => next(args));
+
+    // ……或获取原始 SDK 全局以获得完整访问：
+    const sdk = api.sdk.get(); // ModSDKGlobalAPI | null
+  },
+};
+```
+
+为什么走 `api.sdk` 而非 `window.bcModSdk`：
+
+- **时机。** 宿主在 `document-start` 注入 `__bmmHost`，此时 BMM 尚未创建 SDK。等到
+  `onReady` 运行时 `window.bcModSdk` 已存在；`api.sdk.get()` 让你免去轮询。
+- **权威实例。** BMM 可能用自己的 SDK 替换已存在的实例。`api.sdk` 始终返回 BMM
+  （以及所有 mod）实际使用的那个实例。
+- **劫持感知。** `api.sdk.isHijacked()` 会告诉你 BC 自带的 SDK 先加载且无法被替换的
+  情况。
+
+SDK 接口（`registerMod`、`hookFunction`、`patchFunction` 等）由上游文档说明，并在
+[插件 API](plugin-api#mod-sdk) 中作了概述。
+
 ## 模式
 
 **就绪后驱动 BMM。** `onReady` 在 API 一存在时就交给你，无需轮询：

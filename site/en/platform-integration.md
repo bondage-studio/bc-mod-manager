@@ -90,6 +90,49 @@ The API handed to `onReady` and the events delivered to `onEvent` are exactly th
 same surface plugins use — see [plugin-api](plugin-api) for the full method and
 event reference.
 
+## Accessing the Mod SDK
+
+BMM owns and initializes the [BC Mod SDK](https://github.com/Jomshir98/bondage-club-mod-sdk)
+and publishes it as `window.bcModSdk`. A host that wants to register its own hooks
+or patches should get the SDK through the API handed to `onReady`, **not** by
+reading the global — `onReady` fires once BMM has resolved the SDK race with BC's
+own bundled SDK and guarantees the instance is the authoritative one:
+
+```js
+window.__bmmHost = {
+  platform: { id: "studio-bondage-club", name: "Studio Bondage Club" },
+  onReady(api) {
+    if (api.sdk.isHijacked()) {
+      console.warn("BC's bundled SDK won the race; diagnostics limited");
+    }
+
+    // Register the host's own mod against the same SDK instance.
+    const mod = api.sdk.registerMod({
+      name: "StudioHost",
+      fullName: "Studio Bondage Club host",
+      version: "1.4.2",
+    });
+    mod?.hookFunction("ServerSend", 1, (args, next) => next(args));
+
+    // ...or grab the raw SDK global for full access:
+    const sdk = api.sdk.get(); // ModSDKGlobalAPI | null
+  },
+};
+```
+
+Why go through `api.sdk` instead of `window.bcModSdk`:
+
+- **Timing.** The host injects `__bmmHost` at `document-start`, before BMM creates
+  the SDK. By the time `onReady` runs, `window.bcModSdk` exists; `api.sdk.get()`
+  saves you from polling for it.
+- **Authoritative instance.** BMM may replace a pre-existing SDK with its own.
+  `api.sdk` always returns the instance BMM (and every mod) actually uses.
+- **Hijack awareness.** `api.sdk.isHijacked()` tells you when BC's bundled SDK
+  loaded first and couldn't be replaced.
+
+The SDK surface (`registerMod`, `hookFunction`, `patchFunction`, …) is documented
+upstream and summarized in [plugin-api](plugin-api#mod-sdk).
+
 ## Patterns
 
 **Drive BMM after it's ready.** `onReady` gives you the API as soon as it exists;

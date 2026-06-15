@@ -142,6 +142,31 @@ const off = api.events.on("loadProgress", (p) => {
 | `pageChanged` | `{ page }` | The active page changes (`null` = closed). |
 | `reloadRequested` | `{ reason }` | BMM wants a reload but the host owns reloads. |
 
+## Mod SDK
+
+BMM owns and initializes the [BC Mod SDK](https://github.com/Jomshir98/bondage-club-mod-sdk)
+(`window.bcModSdk`). `api.sdk` hands you the authoritative instance — the same one
+every mod registers against, so all hooks and patches share one chain.
+
+```js
+const sdk = api.sdk.get();          // ModSDKGlobalAPI | null
+if (sdk) {
+  const mod = sdk.registerMod({ name: "MyMod", fullName: "My Mod", version: "1.0.0" });
+  mod.hookFunction("ChatRoomSendChat", 1, (args, next) => next(args));
+}
+
+// Convenience wrapper (returns the per-mod API, or null if the SDK isn't ready):
+const mod = api.sdk.registerMod({ name: "MyMod", fullName: "My Mod", version: "1.0.0" });
+
+api.sdk.isHijacked();  // true if BC's bundled SDK loaded before BMM
+```
+
+Prefer `api.sdk.get()` over reading `window.bcModSdk` directly: BMM guarantees the
+instance is the authoritative one by the time the API is ready, and resolves the
+race with BC's own bundled SDK. `isHijacked()` reports the rare case where BC's
+SDK initialized first and couldn't be replaced — hooks still work, but BMM's crash
+diagnostics are reduced.
+
 ## Debug report
 
 Register a named section that appears in BMM's debug report and log viewer

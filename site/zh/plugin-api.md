@@ -139,6 +139,29 @@ const off = api.events.on("loadProgress", (p) => {
 | `pageChanged` | `{ page }` | 活动页面变化（`null` = 已关闭）。 |
 | `reloadRequested` | `{ reason }` | BMM 需要刷新但刷新由宿主接管。 |
 
+## Mod SDK
+
+BMM 拥有并初始化 [BC Mod SDK](https://github.com/Jomshir98/bondage-club-mod-sdk)
+（`window.bcModSdk`）。`api.sdk` 把权威实例交给你 —— 即每个模组注册时所用的同一个
+实例，因此所有 hook 与 patch 共享同一条链。
+
+```js
+const sdk = api.sdk.get();          // ModSDKGlobalAPI | null
+if (sdk) {
+  const mod = sdk.registerMod({ name: "MyMod", fullName: "My Mod", version: "1.0.0" });
+  mod.hookFunction("ChatRoomSendChat", 1, (args, next) => next(args));
+}
+
+// 便捷封装（返回每个模组的 API，SDK 未就绪时返回 null）：
+const mod = api.sdk.registerMod({ name: "MyMod", fullName: "My Mod", version: "1.0.0" });
+
+api.sdk.isHijacked();  // 若 BC 自带的 SDK 先于 BMM 加载则为 true
+```
+
+优先使用 `api.sdk.get()` 而非直接读取 `window.bcModSdk`：BMM 保证在 API 就绪时该实例
+就是权威实例，并已解决与 BC 自带 SDK 的竞争。`isHijacked()` 报告少见的情况 —— BC 的
+SDK 先初始化且无法被替换；此时 hook 仍可用，但 BMM 的崩溃诊断能力会受限。
+
 ## 调试报告
 
 注册一个出现在 BMM 调试报告与日志查看器中的命名段（与 FUSAM 的

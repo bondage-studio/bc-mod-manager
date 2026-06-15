@@ -6,6 +6,7 @@ import {ModLoaderService} from "@/service/ModLoaderService";
 import {RegistryService} from "@/service/RegistryService";
 import {RegistryDataService} from "@/service/RegistryDataService";
 import {SettingsService} from "@/service/SettingsService";
+import {SdkStateService} from "@/service/SdkStateService";
 import {LogService} from "@/service/LogService";
 import {currentLanguage} from "@/i18n/i18n";
 import {formatLocalizedName} from "@/util/format";
@@ -115,6 +116,28 @@ export interface BmmApi {
     current(): PageName | null;
     /** Force the floating launcher visible/hidden, or `null` to auto-manage. */
     setLauncherVisible(visible: boolean | null): void;
+  };
+
+  sdk: {
+    /**
+     * The BC Mod SDK global instance BMM owns (`window.bcModSdk`), or null if it
+     * is not available yet. This is the same instance mods register against, so
+     * hooks/patches share one chain. Prefer obtaining it here (e.g. inside the
+     * host's `onReady`) over reading `window.bcModSdk` directly, since BMM
+     * guarantees it is the authoritative SDK by the time the API is ready.
+     */
+    get(): ModSDKGlobalAPI | null;
+    /**
+     * Convenience wrapper: register a mod against BMM's SDK instance. Returns the
+     * per-mod API, or null when the SDK is unavailable.
+     */
+    registerMod(info: ModSDKModInfo, options?: ModSDKModOptions): ModSDKModAPI | null;
+    /**
+     * True when BC's bundled SDK initialized before BMM and could not be
+     * replaced (mods had already registered). Hooks still work, but BMM's crash
+     * diagnostics are limited in this state.
+     */
+    isHijacked(): boolean;
   };
 
   events: {
@@ -349,6 +372,23 @@ export class PlatformApiService {
         setLauncherVisible(visible) {
           self.launcherOverride = visible;
           self.launcherObservable.notify(visible);
+        },
+      },
+
+      sdk: {
+        get() {
+          return window.bcModSdk ?? null;
+        },
+        registerMod(info, options) {
+          const sdk = window.bcModSdk;
+          if (!sdk) {
+            Logger.warn("PlatformApiService: bcModSdk unavailable, cannot register mod", {mod: info.name});
+            return null;
+          }
+          return sdk.registerMod(info, options);
+        },
+        isHijacked() {
+          return SdkStateService.isHijacked();
         },
       },
 
