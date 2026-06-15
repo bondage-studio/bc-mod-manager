@@ -134,6 +134,29 @@
       ]
     },
     {
+      "id": "BCXItemRules",
+      "name": {
+        "en": "BCX Item Rules (BCXIR)",
+        "zh": "BCX 物品规则 (BCXIR)"
+      },
+      "description": {
+        "en": "Links locally registered crafted item names to BCX Rules. When a player wears a matching item, BCXIR applies the registered BCX rule payload to the local player through BCX.",
+        "zh": "将本地注册的制作物品名称与 BCX 规则关联。当玩家穿戴匹配物品时，BCXIR 通过 BCX 将已注册的规则应用于本地玩家。"
+      },
+      "author": "VivianMoonlight",
+      "repository": "https://github.com/bondage-studio/BCX-Item-Rules",
+      "tags": ["enhancements", "expansion"],
+      "type": "script",
+      "noCacheBusting": true,
+      "website": "https://github.com/bondage-studio/BCX-Item-Rules",
+      "versions": [
+        {
+          "distribution": "stable",
+          "source": "https://bondage-studio.github.io/BCX-Item-Rules/BCXItemRules.script.js"
+        }
+      ]
+    },
+    {
       "id": "Bondage-Club-Chaos",
       "name": "Bondage Club Chaos (BCC)",
       "description": " bondage-club-chaos",
