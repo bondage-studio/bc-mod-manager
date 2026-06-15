@@ -418,23 +418,27 @@ export default class ModManagerPage extends Component<{}, ModManagerState> {
                       key={uniqueId}
                       className="relative px-3 py-2 transition-[background,box-shadow] duration-150 hover:bg-slate-50 hover:shadow-[inset_3px_0_0_rgb(100_116_139),0_1px_0_rgb(15_23_42/0.06)]"
                     >
-                    <div className="grid grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-2 gap-y-2 sm:grid-cols-[2rem_minmax(0,1fr)_auto_auto] sm:items-center sm:gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-md border border-bmm-border bg-bmm-surface-raised text-xs font-bold text-bmm-muted">
-                        {mod.addon.icon ? (
-                          <img
-                            src={mod.addon.icon}
-                            alt=""
-                            className="h-6 w-6 rounded object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          modInitial
-                        )}
-                      </div>
+                    <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[2rem_minmax(0,1fr)_auto_auto] sm:items-center sm:gap-3">
+                      <div
+                        onClick={() => this.toggleExpanded(uniqueId)}
+                        className="flex cursor-pointer select-none items-start gap-2 rounded-md -mx-1 px-1 py-0.5 transition-colors active:bg-slate-100 sm:contents sm:cursor-default sm:select-auto"
+                      >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-bmm-border bg-bmm-surface-raised text-xs font-bold text-bmm-muted">
+                          {mod.addon.icon ? (
+                            <img
+                              src={mod.addon.icon}
+                              alt=""
+                              className="h-6 w-6 rounded object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            modInitial
+                          )}
+                        </div>
 
-                      <div className="min-w-0">
+                        <div className="min-w-0 flex-1 sm:flex-none">
                         <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 sm:flex-nowrap sm:overflow-hidden">
                           <h3 className="truncate text-sm font-bold leading-5 text-bmm-ink">
                             {modName}
@@ -482,13 +486,21 @@ export default class ModManagerPage extends Component<{}, ModManagerState> {
                         </div>
 
                         {modDescription && (
-                          <p className="mt-0.5 truncate text-xs leading-4 text-bmm-muted">
+                          <p className="mt-0.5 line-clamp-2 text-xs leading-4 text-bmm-muted sm:line-clamp-1">
                             {modDescription}
                           </p>
                         )}
+                        </div>
+
+                        <span className="flex h-8 shrink-0 items-center text-bmm-faint sm:hidden">
+                          <Icon
+                            name="chevron"
+                            className={isExpanded ? '-rotate-90' : 'rotate-90'}
+                          />
+                        </span>
                       </div>
 
-                      <div className="col-span-2 flex gap-2 sm:contents">
+                      <div className="flex gap-2 sm:contents">
                         <Button
                           onClick={() => this.toggleExpanded(uniqueId)}
                           variant="ghost"
@@ -499,7 +511,7 @@ export default class ModManagerPage extends Component<{}, ModManagerState> {
                               className={isExpanded ? '-rotate-90' : 'rotate-90'}
                             />
                           }
-                          className="flex-1 justify-center sm:flex-none"
+                          className="justify-center max-sm:hidden sm:flex-none"
                         >
                           {isExpanded ? t('button-less') : t('button-more')}
                         </Button>
@@ -510,7 +522,7 @@ export default class ModManagerPage extends Component<{}, ModManagerState> {
                             variant="danger"
                             size="sm"
                             title={t('title-remove-mod')}
-                            className="flex-1 justify-center sm:flex-none"
+                            className="flex-1 justify-center max-sm:min-h-10 max-sm:text-sm sm:flex-none"
                           >
                             {t('button-remove-mod')}
                           </Button>
@@ -520,7 +532,7 @@ export default class ModManagerPage extends Component<{}, ModManagerState> {
                             variant="primary"
                             size="sm"
                             title={t('title-install-mod')}
-                            className="flex-1 justify-center sm:flex-none"
+                            className="flex-1 justify-center max-sm:min-h-10 max-sm:text-sm sm:flex-none"
                           >
                             {t('button-install-mod')}
                           </Button>
