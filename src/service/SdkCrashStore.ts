@@ -10,6 +10,12 @@ export interface SdkCrashInfo {
   stackFrames: string[];
   /** Display names of mods that were loaded at the time of the crash */
   loadedMods: string[];
+  /** Mod names that have a hook registered on the failing function */
+  hookedByMods?: string[];
+  /** Mod names that have a source patch applied to the failing function */
+  patchedByMods?: string[];
+  /** Short, safe previews of the arguments the function was called with */
+  args?: string[];
 }
 
 let counter = 0;

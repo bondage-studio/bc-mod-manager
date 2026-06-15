@@ -19,6 +19,7 @@ type UploadState = 'idle' | 'uploading' | 'success' | 'error';
 interface State {
   stackExpanded: boolean;
   modsExpanded: boolean;
+  argsExpanded: boolean;
   uploadState: UploadState;
   pasteUrl: string;
 }
@@ -27,13 +28,14 @@ export default class SdkCrashDialog extends Component<Props, State> {
   state: State = {
     stackExpanded: true,
     modsExpanded: false,
+    argsExpanded: true,
     uploadState: 'idle',
     pasteUrl: '',
   };
 
   componentDidUpdate(prevProps: Props) {
     if (prevProps.crash.id !== this.props.crash.id) {
-      this.setState({ stackExpanded: true, modsExpanded: false, uploadState: 'idle', pasteUrl: '' });
+      this.setState({ stackExpanded: true, modsExpanded: false, argsExpanded: true, uploadState: 'idle', pasteUrl: '' });
     }
   }
 
@@ -47,6 +49,10 @@ export default class SdkCrashDialog extends Component<Props, State> {
 
   private toggleMods = () => {
     this.setState(s => ({ modsExpanded: !s.modsExpanded }));
+  };
+
+  private toggleArgs = () => {
+    this.setState(s => ({ argsExpanded: !s.argsExpanded }));
   };
 
   private handleUpload = async () => {
@@ -70,7 +76,10 @@ export default class SdkCrashDialog extends Component<Props, State> {
 
   render() {
     const { crash, queueLength } = this.props;
-    const { stackExpanded, modsExpanded, uploadState, pasteUrl } = this.state;
+    const { stackExpanded, modsExpanded, argsExpanded, uploadState, pasteUrl } = this.state;
+    const hookedByMods = crash.hookedByMods ?? [];
+    const patchedByMods = crash.patchedByMods ?? [];
+    const args = crash.args ?? [];
 
     return (
       <ModalBackdrop className="z-[65]">
@@ -101,6 +110,28 @@ export default class SdkCrashDialog extends Component<Props, State> {
               <Badge variant="neutral">{crash.fn}</Badge>
             </div>
 
+            {/* Mods hooking / patching the failing function */}
+            {(hookedByMods.length > 0 || patchedByMods.length > 0) && (
+              <div className="flex flex-col gap-2">
+                {hookedByMods.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span className="text-bmm-muted font-semibold">{t('crash-label-hooked-by')}</span>
+                    {hookedByMods.map(m => (
+                      <Badge key={m} variant={m === crash.mod ? 'danger' : 'neutral'}>{m}</Badge>
+                    ))}
+                  </div>
+                )}
+                {patchedByMods.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span className="text-bmm-muted font-semibold">{t('crash-label-patched-by')}</span>
+                    {patchedByMods.map(m => (
+                      <Badge key={m} variant={m === crash.mod ? 'danger' : 'neutral'}>{m}</Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Error message */}
             <div>
               <p className="mb-1.5 text-xs font-bold text-bmm-muted uppercase tracking-wide">
@@ -110,6 +141,31 @@ export default class SdkCrashDialog extends Component<Props, State> {
                 <p className="m-0 text-sm font-semibold text-red-800 break-words">{crash.errorMessage}</p>
               </div>
             </div>
+
+            {/* Arguments (collapsible, default expanded) */}
+            {args.length > 0 && (
+              <div>
+                <button
+                  type="button"
+                  onClick={this.toggleArgs}
+                  className="flex items-center gap-1.5 text-xs font-bold text-bmm-muted hover:text-bmm-ink transition-colors"
+                >
+                  <Icon name="chevron" open={argsExpanded} className="text-[0.65rem]"/>
+                  {t('crash-label-args')}
+                  <span className="ml-1 text-bmm-muted font-normal">({args.length})</span>
+                </button>
+                {argsExpanded && (
+                  <ol className="mt-2 m-0 flex list-none flex-col gap-1.5 overflow-hidden rounded-lg border border-bmm-border bg-bmm-surface-muted p-2.5 pl-0">
+                    {args.map((a, i) => (
+                      <li key={i} className="flex gap-2 px-2.5 text-[0.6875rem] leading-5 text-bmm-muted">
+                        <span className="shrink-0 select-none text-bmm-muted/60 tabular-nums">[{i}]</span>
+                        <code className="min-w-0 break-words whitespace-pre-wrap">{a}</code>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </div>
+            )}
 
             {/* Stack trace (collapsible, default expanded) */}
             {crash.stackFrames.length > 0 && (

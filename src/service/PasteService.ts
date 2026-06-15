@@ -32,10 +32,22 @@ export function formatCrashReport(crash: SdkCrashInfo): string {
   lines.push(`Type:     ${crash.type === 'hook' ? 'Mod Hook Crash' : 'Mod Patch Crash'}`);
   lines.push(`Mod:      ${crash.mod}`);
   lines.push(`Function: ${crash.fn}`);
+  if (crash.hookedByMods && crash.hookedByMods.length > 0) {
+    lines.push(`Hooked by: ${crash.hookedByMods.join(', ')}`);
+  }
+  if (crash.patchedByMods && crash.patchedByMods.length > 0) {
+    lines.push(`Patched by: ${crash.patchedByMods.join(', ')}`);
+  }
   lines.push('');
   lines.push('--- Error ---');
   lines.push(crash.errorMessage);
   lines.push('');
+
+  if (crash.args && crash.args.length > 0) {
+    lines.push('--- Arguments ---');
+    lines.push(...crash.args.map((a, i) => `  [${i}] ${a}`));
+    lines.push('');
+  }
 
   if (crash.stackFrames.length > 0) {
     lines.push('--- Stack Trace ---');
