@@ -9,7 +9,7 @@ interface ModalBackdropProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'c
 export default function ModalBackdrop({children, className, ...props}: ModalBackdropProps) {
   return (
     <div {...props}
-         className={cn('fixed inset-0 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-[2px]', className)}>
+         className={cn('fixed inset-0 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-[2px] max-[720px]:p-0', className)}>
       {children}
     </div>
   );

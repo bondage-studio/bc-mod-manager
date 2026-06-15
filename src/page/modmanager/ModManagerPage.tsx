@@ -299,7 +299,7 @@ export default class ModManagerPage extends Component<{}, ModManagerState> {
     return (
       <Page size="xl">
         <div className="mb-3 space-y-2">
-          <h1 className="text-center text-lg font-extrabold tracking-tight text-bmm-ink">
+          <h1 className="px-10 text-center text-lg font-extrabold tracking-tight text-bmm-ink sm:px-0">
             {t('title-mod-manager')}
           </h1>
 
@@ -418,24 +418,28 @@ export default class ModManagerPage extends Component<{}, ModManagerState> {
                       key={uniqueId}
                       className="relative px-3 py-2 transition-[background,box-shadow] duration-150 hover:bg-slate-50 hover:shadow-[inset_3px_0_0_rgb(100_116_139),0_1px_0_rgb(15_23_42/0.06)]"
                     >
-                    <div className="grid gap-2 sm:grid-cols-[2rem_minmax(0,1fr)_auto_auto] sm:items-center sm:gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-md border border-bmm-border bg-bmm-surface-raised text-xs font-bold text-bmm-muted">
-                        {mod.addon.icon ? (
-                          <img
-                            src={mod.addon.icon}
-                            alt=""
-                            className="h-6 w-6 rounded object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          modInitial
-                        )}
-                      </div>
+                    <div className="flex flex-col gap-2 sm:grid sm:grid-cols-[2rem_minmax(0,1fr)_auto_auto] sm:items-center sm:gap-3">
+                      <div
+                        onClick={() => this.toggleExpanded(uniqueId)}
+                        className="flex cursor-pointer select-none items-start gap-2 rounded-md -mx-1 px-1 py-0.5 transition-colors active:bg-slate-100 sm:contents sm:cursor-default sm:select-auto"
+                      >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-bmm-border bg-bmm-surface-raised text-xs font-bold text-bmm-muted">
+                          {mod.addon.icon ? (
+                            <img
+                              src={mod.addon.icon}
+                              alt=""
+                              className="h-6 w-6 rounded object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            modInitial
+                          )}
+                        </div>
 
-                      <div className="min-w-0">
-                        <div className="flex min-w-0 items-center gap-1.5 overflow-hidden">
+                        <div className="min-w-0 flex-1 sm:flex-none">
+                        <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-1 sm:flex-nowrap sm:overflow-hidden">
                           <h3 className="truncate text-sm font-bold leading-5 text-bmm-ink">
                             {modName}
                           </h3>
@@ -482,48 +486,58 @@ export default class ModManagerPage extends Component<{}, ModManagerState> {
                         </div>
 
                         {modDescription && (
-                          <p className="mt-0.5 truncate text-xs leading-4 text-bmm-muted">
+                          <p className="mt-0.5 line-clamp-2 text-xs leading-4 text-bmm-muted sm:line-clamp-1">
                             {modDescription}
                           </p>
                         )}
-                      </div>
+                        </div>
 
-                      <Button
-                        onClick={() => this.toggleExpanded(uniqueId)}
-                        variant="ghost"
-                        size="sm"
-                        icon={
+                        <span className="flex h-8 shrink-0 items-center text-bmm-faint sm:hidden">
                           <Icon
                             name="chevron"
                             className={isExpanded ? '-rotate-90' : 'rotate-90'}
                           />
-                        }
-                        className="justify-start sm:justify-center"
-                      >
-                        {isExpanded ? t('button-less') : t('button-more')}
-                      </Button>
+                        </span>
+                      </div>
 
-                      {isEnabled ? (
+                      <div className="flex gap-2 sm:contents">
                         <Button
-                          onClick={() => this.handleRemoveMod(mod.addon.id, mod.registryId)}
-                          variant="danger"
+                          onClick={() => this.toggleExpanded(uniqueId)}
+                          variant="ghost"
                           size="sm"
-                          title={t('title-remove-mod')}
-                          className="justify-start sm:justify-center"
+                          icon={
+                            <Icon
+                              name="chevron"
+                              className={isExpanded ? '-rotate-90' : 'rotate-90'}
+                            />
+                          }
+                          className="justify-center max-sm:hidden sm:flex-none"
                         >
-                          {t('button-remove-mod')}
+                          {isExpanded ? t('button-less') : t('button-more')}
                         </Button>
-                      ) : (
-                        <Button
-                          onClick={() => this.handleInstallMod(mod.addon.id, mod.registryId)}
-                          variant="primary"
-                          size="sm"
-                          title={t('title-install-mod')}
-                          className="justify-start sm:justify-center"
-                        >
-                          {t('button-install-mod')}
-                        </Button>
-                      )}
+
+                        {isEnabled ? (
+                          <Button
+                            onClick={() => this.handleRemoveMod(mod.addon.id, mod.registryId)}
+                            variant="danger"
+                            size="sm"
+                            title={t('title-remove-mod')}
+                            className="flex-1 justify-center max-sm:min-h-10 max-sm:text-sm sm:flex-none"
+                          >
+                            {t('button-remove-mod')}
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={() => this.handleInstallMod(mod.addon.id, mod.registryId)}
+                            variant="primary"
+                            size="sm"
+                            title={t('title-install-mod')}
+                            className="flex-1 justify-center max-sm:min-h-10 max-sm:text-sm sm:flex-none"
+                          >
+                            {t('button-install-mod')}
+                          </Button>
+                        )}
+                      </div>
                     </div>
 
                     {isExpanded && (

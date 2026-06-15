@@ -74,7 +74,7 @@ export default class SdkCrashDialog extends Component<Props, State> {
 
     return (
       <ModalBackdrop className="z-[65]">
-        <div className="flex w-[min(92vw,720px)] max-h-[min(90vh,800px)] flex-col overflow-hidden rounded-lg border border-red-200 bg-bmm-surface shadow-bmm-panel ring-1 ring-slate-950/5">
+        <div className="flex w-[min(92vw,720px)] max-h-[min(90vh,800px)] flex-col overflow-hidden rounded-lg border border-red-200 bg-bmm-surface shadow-bmm-panel ring-1 ring-slate-950/5 max-[720px]:h-dvh max-[720px]:max-h-dvh max-[720px]:w-dvw max-[720px]:max-w-dvw max-[720px]:rounded-none max-[720px]:border-0 max-[720px]:ring-0">
 
           {/* Header */}
           <div className="flex items-center justify-between gap-3 border-b border-red-100 bg-red-50 px-5 py-3.5">
