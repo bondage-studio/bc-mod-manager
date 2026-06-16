@@ -178,5 +178,6 @@
   "settings-section-loading": "Mod-Laden",
   "settings-mod-cache-label": "Mods aus Cache laden",
   "settings-mod-cache-description": "Laedt Mods fuer einen schnelleren Start aus dem Browser-Cache und fordert dich zum Neuladen auf, wenn eine neuere Version erkannt wird. Wenn deaktiviert, werden Mods bei jedem Besuch frisch abgerufen.",
-  "settings-note-reload": "Aenderungen werden beim naechsten Neuladen der Seite wirksam."
+  "settings-note-reload": "Aenderungen werden beim naechsten Neuladen der Seite wirksam.",
+  "settings-managed-by-platform": "This setting is managed by the platform and cannot be changed here."
 }
