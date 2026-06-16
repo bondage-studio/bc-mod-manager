@@ -323,6 +323,7 @@ export default function AppLauncher({ items, onToggle, open, title }: AppLaunche
 
   const [dragPoint, setDragPoint] = useState<{ x: number; y: number } | null>(null);
   const [introHint, setIntroHint] = useState(true);
+  const [coarsePointer, setCoarsePointer] = useState(false);
 
   const dragRef = useRef<DragState | null>(null);
   const skipClickRef = useRef(false);
@@ -341,6 +342,23 @@ useEffect(() => {
     window.clearTimeout(timer);
   };
 }, []);
+
+  // Stop the intro "shake" as soon as the menu is opened.
+  useEffect(() => {
+    if (open) setIntroHint(false);
+  }, [open]);
+
+  // Touch / hover-less devices have no `hover:` state to reveal the docked
+  // button, so the auto-hide is disabled there to keep it fully tappable.
+  useEffect(() => {
+    const query = window.matchMedia("(hover: none), (pointer: coarse)");
+    const update = () => setCoarsePointer(query.matches);
+
+    update();
+    query.addEventListener("change", update);
+
+    return () => query.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     const nextViewport = getViewport();
@@ -507,13 +525,7 @@ useEffect(() => {
   return (
     <div
       style={rootStyle}
-      className={cn(
-        "fixed z-50 transition-[opacity,transform] duration-200",
-        !open && !isDragging && !introHint && getAutoHideClass(dock.edge),
-        introHint && !isDragging && "bmm-launcher-intro-root opacity-100",
-        open && "opacity-100",
-        isDragging && "cursor-grabbing select-none opacity-90",
-      )}
+      className={cn("fixed z-50", isDragging && "select-none")}
     >
       <style>
         {`
@@ -639,42 +651,55 @@ useEffect(() => {
         `}
       </style>
 
-      <button
-        type="button"
-        onClick={handleClick}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-        title={title}
-        aria-expanded={open}
-        aria-label={title}
+      <div
         className={cn(
-          "relative flex touch-none items-center justify-center",
-          "border border-white/20 bg-white/0 text-white/75 shadow-none backdrop-blur-sm",
-          "transition-[background,border-color,box-shadow,color,transform] duration-200",
-          "hover:border-white/40 hover:bg-white/20 hover:text-white hover:shadow-bmm-card",
-          "active:scale-95",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2",
-          getButtonEdgeClass(dock.edge),
-          open && "border-white/45 bg-white/25 text-white shadow-bmm-card",
-          introHint && !isDragging && "bmm-launcher-intro-button",
+          "transition-[opacity,transform] duration-200",
+          !open &&
+            !isDragging &&
+            !introHint &&
+            (coarsePointer ? "opacity-100" : getAutoHideClass(dock.edge)),
+          introHint && !isDragging && "bmm-launcher-intro-root opacity-100",
+          open && "opacity-100",
+          isDragging && "cursor-grabbing opacity-90",
         )}
       >
-        <svg
-          aria-hidden="true"
-          viewBox={isHorizontal ? "0 0 40 24" : "0 0 24 40"}
-          className={isHorizontal ? "h-6 w-10" : "h-10 w-6"}
+        <button
+          type="button"
+          onClick={handleClick}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          title={title}
+          aria-expanded={open}
+          aria-label={title}
+          className={cn(
+            "relative flex touch-none items-center justify-center",
+            "border border-white/20 bg-white/0 text-white/75 shadow-none backdrop-blur-sm",
+            "transition-[background,border-color,box-shadow,color,transform] duration-200",
+            "hover:border-white/40 hover:bg-white/20 hover:text-white hover:shadow-bmm-card",
+            "active:scale-95",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2",
+            getButtonEdgeClass(dock.edge),
+            open && "border-white/45 bg-white/25 text-white shadow-bmm-card",
+            introHint && !isDragging && "bmm-launcher-intro-button",
+          )}
         >
-          <path
-            d={getArcPath(dock.edge)}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          />
-        </svg>
-      </button>
+          <svg
+            aria-hidden="true"
+            viewBox={isHorizontal ? "0 0 40 24" : "0 0 24 40"}
+            className={isHorizontal ? "h-6 w-10" : "h-10 w-6"}
+          >
+            <path
+              d={getArcPath(dock.edge)}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
+      </div>
 
       <div
         style={menuStyle}
