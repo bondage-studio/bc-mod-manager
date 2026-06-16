@@ -178,5 +178,6 @@
   "settings-section-loading": "Загрузка модов",
   "settings-mod-cache-label": "Загрузка модов из кэша",
   "settings-mod-cache-description": "Загружает моды из кэша браузера для более быстрого запуска и предлагает перезагрузить страницу при обнаружении новой версии. Если выключено, моды загружаются заново при каждом посещении.",
-  "settings-note-reload": "Изменения вступят в силу при следующей перезагрузке страницы."
+  "settings-note-reload": "Изменения вступят в силу при следующей перезагрузке страницы.",
+  "settings-managed-by-platform": "This setting is managed by the platform and cannot be changed here."
 }
