@@ -179,5 +179,10 @@
   "settings-mod-cache-label": "Chargement des mods depuis le cache",
   "settings-mod-cache-description": "Charge les mods depuis le cache du navigateur pour un demarrage plus rapide et vous invite a recharger lorsqu'une version plus recente est detectee. Si desactive, les mods sont recuperes a chaque visite.",
   "settings-note-reload": "Les modifications prendront effet au prochain rechargement de la page.",
-  "settings-managed-by-platform": "This setting is managed by the platform and cannot be changed here."
+  "settings-managed-by-platform": "This setting is managed by the platform and cannot be changed here.",
+  "sidebar-category-all": "All",
+  "sidebar-category-recommend": "Recommend",
+  "sidebar-group-tags": "Tags",
+  "sidebar-group-registries": "Registries",
+  "sidebar-custom-extensions": "Custom Extensions"
 }
