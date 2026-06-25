@@ -176,5 +176,10 @@
   "settings-mod-cache-label": "快取載入模組",
   "settings-mod-cache-description": "从浏览器快取載入模組以加快启动速度，并在检测到新版本时提示你刷新。关闭后将在每次访问时取得最新版本。",
   "settings-note-reload": "更改将在下次刷新页面后生效。",
-  "settings-managed-by-platform": "此設定由平台管理，無法在此處變更。"
+  "settings-managed-by-platform": "此設定由平台管理，無法在此處變更。",
+  "sidebar-category-all": "全部",
+  "sidebar-category-recommend": "推薦",
+  "sidebar-group-tags": "標籤",
+  "sidebar-group-registries": "註冊表",
+  "sidebar-custom-extensions": "自訂擴充"
 }

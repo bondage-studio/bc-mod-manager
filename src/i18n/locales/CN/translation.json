@@ -179,5 +179,10 @@
   "settings-mod-cache-label": "缓存加载模组",
   "settings-mod-cache-description": "从浏览器缓存加载模组以加快启动速度，并在检测到新版本时提示你刷新。关闭后将在每次访问时获取最新版本。",
   "settings-note-reload": "更改将在下次刷新页面后生效。",
-  "settings-managed-by-platform": "该设置由平台管理，无法在此处更改。"
+  "settings-managed-by-platform": "该设置由平台管理，无法在此处更改。",
+  "sidebar-category-all": "全部",
+  "sidebar-category-recommend": "推荐",
+  "sidebar-group-tags": "标签",
+  "sidebar-group-registries": "注册表",
+  "sidebar-custom-extensions": "自定义扩展"
 }

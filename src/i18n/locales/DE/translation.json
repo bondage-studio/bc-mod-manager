@@ -176,5 +176,10 @@
   "settings-mod-cache-label": "Mods aus Cache laden",
   "settings-mod-cache-description": "Laedt Mods fuer einen schnelleren Start aus dem Browser-Cache und fordert dich zum Neuladen auf, wenn eine neuere Version erkannt wird. Wenn deaktiviert, werden Mods bei jedem Besuch frisch abgerufen.",
   "settings-note-reload": "Aenderungen werden beim naechsten Neuladen der Seite wirksam.",
-  "settings-managed-by-platform": "Diese Einstellung wird von der Plattform verwaltet und kann hier nicht geändert werden."
+  "settings-managed-by-platform": "Diese Einstellung wird von der Plattform verwaltet und kann hier nicht geändert werden.",
+  "sidebar-category-all": "Alle",
+  "sidebar-category-recommend": "Empfohlen",
+  "sidebar-group-tags": "Tags",
+  "sidebar-group-registries": "Registries",
+  "sidebar-custom-extensions": "Eigene Erweiterungen"
 }

@@ -176,5 +176,10 @@
   "settings-mod-cache-label": "Загрузка модов из кэша",
   "settings-mod-cache-description": "Загружает моды из кэша браузера для более быстрого запуска и предлагает перезагрузить страницу при обнаружении новой версии. Если выключено, моды загружаются заново при каждом посещении.",
   "settings-note-reload": "Изменения вступят в силу при следующей перезагрузке страницы.",
-  "settings-managed-by-platform": "Эта настройка управляется платформой и не может быть изменена здесь."
+  "settings-managed-by-platform": "Эта настройка управляется платформой и не может быть изменена здесь.",
+  "sidebar-category-all": "Все",
+  "sidebar-category-recommend": "Рекомендуемые",
+  "sidebar-group-tags": "Теги",
+  "sidebar-group-registries": "Реестры",
+  "sidebar-custom-extensions": "Свои расширения"
 }
