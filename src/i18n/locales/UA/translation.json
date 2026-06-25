@@ -179,5 +179,10 @@
   "settings-mod-cache-label": "Завантаження модів з кешу",
   "settings-mod-cache-description": "Завантажує моди з кешу браузера для швидшого запуску та пропонує перезавантажити сторінку, коли знайдено новішу версію. Якщо вимкнено, моди завантажуються заново під час кожного відвідування.",
   "settings-note-reload": "Зміни набудуть чинності після наступного перезавантаження сторінки.",
-  "settings-managed-by-platform": "This setting is managed by the platform and cannot be changed here."
+  "settings-managed-by-platform": "This setting is managed by the platform and cannot be changed here.",
+  "sidebar-category-all": "All",
+  "sidebar-category-recommend": "Recommend",
+  "sidebar-group-tags": "Tags",
+  "sidebar-group-registries": "Registries",
+  "sidebar-custom-extensions": "Custom Extensions"
 }
