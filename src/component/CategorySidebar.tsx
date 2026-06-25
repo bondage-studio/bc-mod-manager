@@ -34,7 +34,7 @@ interface CategorySidebarProps {
  * right below "All"), regardless of whether any mod actually carries it.
  */
 const RECOMMEND_TAG = "recommended";
-export const RECOMMEND_MOD_IDS = new Set<string>(["WCE", "BCX", "LSCG", "MBS", "DOGS", "echocloth", "echomove"]);
+export const RECOMMEND_MOD_IDS = new Set<string>(["WCE", "BCX", "LSCG", "MBS", "echocloth", "echomove"]);
 function isRecommend(mod: { addon: FusamAddon }): boolean {
   return !!mod.addon.tags?.includes(RECOMMEND_TAG) || RECOMMEND_MOD_IDS.has(mod.addon.id);
 }
