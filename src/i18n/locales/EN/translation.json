@@ -179,5 +179,10 @@
   "settings-mod-cache-label": "Cached mod loading",
   "settings-mod-cache-description": "Load mods from the browser cache for faster startup, and prompt you to reload when a newer version is detected. When off, mods are fetched fresh on every visit.",
   "settings-note-reload": "Changes take effect the next time the page is reloaded.",
-  "settings-managed-by-platform": "This setting is managed by the platform and cannot be changed here."
+  "settings-managed-by-platform": "This setting is managed by the platform and cannot be changed here.",
+  "sidebar-category-all": "All",
+  "sidebar-category-recommend": "Recommend",
+  "sidebar-group-tags": "Tags",
+  "sidebar-group-registries": "Registries",
+  "sidebar-custom-extensions": "Custom Extensions"
 }
