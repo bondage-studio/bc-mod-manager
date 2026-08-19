@@ -1,4 +1,5 @@
 import {Observable} from '@/infrastructure/pubsub/Observable';
+import {t} from '@/i18n/i18n';
 
 /**
  * ModalStore - UI state for the modal dialog stack.
@@ -47,6 +48,59 @@ export class ModalStore {
 
     this.modals.push(modal);
     this.notify();
+  }
+
+  static confirm(
+    prompt: string | Node,
+    options?: { confirmLabel?: string; cancelLabel?: string },
+  ): Promise<boolean> {
+    return new Promise((resolve) => {
+      this.open({
+        prompt,
+        buttons: {
+          submit: options?.confirmLabel ?? t('button-ok'),
+          cancel: options?.cancelLabel ?? t('button-cancel'),
+        },
+        callback: (action) => resolve(action === 'submit'),
+      });
+    });
+  }
+
+  static alert(prompt: string | Node, confirmLabel?: string): Promise<void> {
+    return new Promise((resolve) => {
+      this.open({
+        prompt,
+        buttons: {submit: confirmLabel ?? t('button-ok')},
+        callback: () => resolve(),
+      });
+    });
+  }
+
+  static prompt(
+    prompt: string | Node,
+    options?: {
+      initial?: string;
+      type?: "input" | "textarea";
+      readonly?: boolean;
+      confirmLabel?: string;
+      cancelLabel?: string;
+    },
+  ): Promise<string | null> {
+    return new Promise((resolve) => {
+      this.open({
+        prompt,
+        input: {
+          initial: options?.initial ?? "",
+          type: options?.type ?? "input",
+          readonly: options?.readonly ?? false,
+        },
+        buttons: {
+          submit: options?.confirmLabel ?? t('button-ok'),
+          cancel: options?.cancelLabel ?? t('button-cancel'),
+        },
+        callback: (action, inputValue) => resolve(action === 'submit' ? inputValue ?? "" : null),
+      });
+    });
   }
 
   /**

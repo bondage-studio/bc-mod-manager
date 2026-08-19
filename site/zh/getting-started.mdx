@@ -1,0 +1,49 @@
+---
+title: 快速开始
+description: 通过油猴脚本、书签或控制台安装 BC Mod Manager，并启用你的第一个模组。
+order: 2
+---
+
+## 安装
+
+推荐使用油猴脚本运行 BMM —— 它会在 Bondage Club 页面于 `document-start` 自动运行：
+
+<UserscriptInstall
+  url="https://bondage-studio.github.io/bc-mod-manager/bmm.user.js"
+  name="BC Mod Manager"
+/>
+
+油猴脚本会在以下 Bondage Club 域名上运行：
+
+- `bondageprojects.elementfx.com`
+- `bondage-europe.com`
+- `bondage-asia.com`
+
+### 书签 / 控制台
+
+也可以使用书签或浏览器控制台临时注入 BMM：
+
+```js
+(_ => {
+  const script = document.createElement("script");
+  script.src = "https://bondage-studio.github.io/bc-mod-manager/main.js";
+  document.head.appendChild(script);
+})()
+```
+
+## 使用
+
+1. 安装油猴脚本，或使用书签/控制台注入 BMM。
+2. 打开 Bondage Club。
+3. 在登录页或偏好设置页点击 `BC Mod Manager` 悬浮按钮。
+4. 在 **注册表管理器** 中刷新预设 registry，或添加自己的 registry。
+5. 在 **模组管理器** 中搜索、安装、选择版本并启用模组。
+6. 刷新页面，让启用状态和版本选择在新的游戏会话中生效。
+
+> 移除已经加载的模组后，BMM 会在关闭模组管理器时刷新页面。原因是大多数 BC
+> 模组执行后无法被完全卸载，仅移除 `<script>` 标签并不能撤销其对游戏运行时的修改。
+
+## 下一步
+
+- [registry-format](registry-format) —— 添加自定义 registry 时理解 BMM 读取的 manifest。
+- [development](development) —— 从源码构建或参与贡献。

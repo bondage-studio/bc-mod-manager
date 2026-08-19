@@ -1,6 +1,7 @@
 import {Component} from "preact";
 import {Logger, type LogEntry, type LogLevel} from "@/infrastructure/logging/Logger";
 import {LogService} from "@/service/LogService";
+import {ModalStore} from "@/ui/store/ModalStore";
 import {t} from "@/i18n/i18n";
 import {formatData} from "@/util/format.ts";
 import Badge, {type BadgeVariant} from "@/component/ui/Badge";
@@ -87,8 +88,8 @@ export default class LogManagerPage extends Component<{}, LogManagerState> {
     }
   };
 
-  handleClearLogs = () => {
-    if (confirm(t('confirm-clear-logs'))) {
+  handleClearLogs = async () => {
+    if (await ModalStore.confirm(t('confirm-clear-logs'))) {
       Logger.clearLogs();
       this.loadLogs();
     }

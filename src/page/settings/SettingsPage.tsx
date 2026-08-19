@@ -58,9 +58,16 @@ export default class SettingsPage extends Component<{}, SettingsPageState> {
             <Toggle
               checked={settings.modCacheEnabled}
               onChange={this.handleToggleModCache}
+              disabled={SettingsService.isLocked('modCacheEnabled')}
               label={t('settings-mod-cache-label')}
             />
           </div>
+
+          {SettingsService.isLocked('modCacheEnabled') && (
+            <p className="m-0 mt-2 text-[0.8125rem] text-bmm-faint">
+              {t('settings-managed-by-platform')}
+            </p>
+          )}
 
           <div className="mt-3.5 flex flex-wrap items-center gap-3 border-t border-bmm-border pt-3.5">
             <p className="m-0 text-[0.8125rem] text-bmm-muted">{t('settings-note-reload')}</p>

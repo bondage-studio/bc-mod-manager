@@ -1,6 +1,7 @@
 import {ModVersionPinRepository} from '@/repository/ModVersionPinRepository';
 import {Observable} from '@/infrastructure/pubsub/Observable';
 import {Logger} from '@/infrastructure/logging/Logger';
+import {PlatformBridge} from '@/infrastructure/bridge/PlatformBridge';
 
 /**
  * Per-mod runtime cache state. Mirrors the loader version bridge in
@@ -127,7 +128,7 @@ export class ModCacheService {
       return;
     }
     try {
-      const response = await fetch(sourceUrl, {mode: 'cors', credentials: 'omit', cache: 'no-cache'});
+      const response = await PlatformBridge.fetch(sourceUrl, {mode: 'cors', credentials: 'omit', cache: 'no-cache'});
       if (!response.ok) {
         return;
       }

@@ -1,6 +1,7 @@
 import {Component} from "preact";
 import {RegistryService} from "@/service/RegistryService";
 import {RegistryDataService} from "@/service/RegistryDataService";
+import {ModalStore} from "@/ui/store/ModalStore";
 import type {CachedRegistryData, Registry, RegistryType} from "@/domain/Registry";
 import {t} from "@/i18n/i18n";
 import Alert from "@/component/ui/Alert";
@@ -150,8 +151,8 @@ export default class RegistryManagerPage extends Component<{}, RegistryManagerSt
     });
   };
 
-  handleDelete = (id: string) => {
-    if (confirm(t('confirm-delete-registry'))) {
+  handleDelete = async (id: string) => {
+    if (await ModalStore.confirm(t('confirm-delete-registry'), {confirmLabel: t('button-delete')})) {
       const success = RegistryService.delete(id);
 
       if (success) {

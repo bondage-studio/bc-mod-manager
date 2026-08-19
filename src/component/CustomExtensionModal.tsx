@@ -1,6 +1,7 @@
 import {Component} from 'preact';
 import {CustomExtensionService} from '@/service/CustomExtensionService';
 import type {CustomExtension, CustomExtensionType} from '@/domain/CustomExtension';
+import {ModalStore} from '@/ui/store/ModalStore';
 import {t} from '@/i18n/i18n';
 import Alert from '@/component/ui/Alert';
 import Badge from '@/component/ui/Badge';
@@ -174,8 +175,8 @@ export default class CustomExtensionModal extends Component<CustomExtensionModal
     }
   };
 
-  handleDelete = (id: string) => {
-    if (confirm(t('confirm-delete-extension'))) {
+  handleDelete = async (id: string) => {
+    if (await ModalStore.confirm(t('confirm-delete-extension'), {confirmLabel: t('button-delete')})) {
       const success = CustomExtensionService.remove(id);
       if (success) {
         this.setState({

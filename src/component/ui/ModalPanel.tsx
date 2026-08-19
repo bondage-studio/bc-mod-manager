@@ -15,7 +15,7 @@ export default function ModalPanel({actions, children, className, footer, subtit
     <div
       {...props}
       className={cn(
-        'flex w-[min(92vw,860px)] max-h-[min(90vh,860px)] flex-col overflow-hidden rounded-lg border border-white/70 bg-bmm-surface shadow-bmm-panel ring-1 ring-slate-950/5',
+        'flex w-[min(92vw,860px)] max-h-[min(90vh,860px)] flex-col overflow-hidden rounded-lg border border-white/70 bg-bmm-surface shadow-bmm-panel ring-1 ring-slate-950/5 max-[720px]:h-dvh max-[720px]:max-h-dvh max-[720px]:w-dvw max-[720px]:max-w-dvw max-[720px]:rounded-none max-[720px]:border-0 max-[720px]:ring-0',
         className,
       )}
     >

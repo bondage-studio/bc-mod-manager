@@ -7,6 +7,7 @@ import {ModLoaderService} from "@/service/ModLoaderService.ts";
 import {ModCacheService} from "@/service/ModCacheService.ts";
 import {LoaderVersion} from "@/infrastructure/bridge/LoaderVersion";
 import {SdkStateService} from "@/service/SdkStateService.ts";
+import {FusamStateService} from "@/service/FusamStateService.ts";
 import {BcGameState} from "@/service/BcGameState.ts";
 import type {ModLoadProgress, ModLoadStatus} from "@/domain/ModLoad";
 import {formatDuration} from "@/util/format.ts";
@@ -25,6 +26,7 @@ interface ModLoadingWindowState {
   outdatedModKeys: string[];
   sdkHijacked: boolean;       // BC's SDK initialized before ours with mods already registered
   sdkHijackedCount: number;
+  fusamConflict: boolean;     // a genuine FUSAM loader is also present on the page
   dismissed: boolean;
   loggedIn: boolean;          // BC account login has completed
 }
@@ -53,6 +55,7 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
   private unsubscribeVersion?: () => void;
   private unsubscribeModCache?: () => void;
   private unsubscribeSdkState?: () => void;
+  private unsubscribeFusamState?: () => void;
   private hideTimer: number | null = null;
   private safetyTimer: number | null = null;
   private screenTimer: number | null = null;
@@ -67,6 +70,7 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
       outdatedModKeys: ModCacheService.getOutdatedModKeys(),
       sdkHijacked: SdkStateService.isHijacked(),
       sdkHijackedCount: SdkStateService.getHijackInfo()?.registeredMods.length ?? 0,
+      fusamConflict: FusamStateService.isConflict(),
       dismissed: false,
       loggedIn: BcGameState.isLoggedIn(),
     };
@@ -111,6 +115,13 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
       }
     });
 
+    this.unsubscribeFusamState = FusamStateService.subscribe(conflict => {
+      if (conflict) {
+        this.clearHideTimer();
+        this.setState({fusamConflict: true, dismissed: false});
+      }
+    });
+
     this.scheduleAutoHide(this.state.progress.finished);
 
     // Mods load as soon as BC creates Player, but the startup window stays
@@ -138,6 +149,7 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
     this.unsubscribeVersion?.();
     this.unsubscribeModCache?.();
     this.unsubscribeSdkState?.();
+    this.unsubscribeFusamState?.();
     this.clearHideTimer();
     if (this.safetyTimer !== null) {
       clearTimeout(this.safetyTimer);
@@ -150,22 +162,22 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
   }
 
   private anyOutdated(): boolean {
-    return LoaderVersion.isOutdated() || ModCacheService.isAnyOutdated() || SdkStateService.isHijacked();
+    return LoaderVersion.isOutdated() || ModCacheService.isAnyOutdated() || SdkStateService.isHijacked() || FusamStateService.isConflict();
   }
 
   render() {
-    const {progress, outdated, modsOutdated, modsOutdatedCount, outdatedModKeys, sdkHijacked, sdkHijackedCount, dismissed} = this.state;
+    const {progress, outdated, modsOutdated, modsOutdatedCount, outdatedModKeys, sdkHijacked, sdkHijackedCount, fusamConflict, dismissed} = this.state;
     if (dismissed) {
       return null;
     }
     // Nothing worth showing: no mods to load and everything is current.
-    if (progress.total === 0 && !outdated && !modsOutdated && !sdkHijacked) {
+    if (progress.total === 0 && !outdated && !modsOutdated && !sdkHijacked && !fusamConflict) {
       return null;
     }
 
     const percent = progress.total > 0
       ? Math.round((progress.settled / progress.total) * 100)
-      : (outdated || modsOutdated ? 100 : 0);
+      : (outdated || modsOutdated || fusamConflict ? 100 : 0);
     const outdatedModKeySet = new Set(outdatedModKeys);
 
     return (
@@ -219,6 +231,13 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
                   <Icon name="refresh"/>
                   {t('loading-button-reload')}
                 </button>
+              </div>
+            )}
+
+            {fusamConflict && (
+              <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
+                <p className="m-0 text-[0.8125rem] font-bold text-amber-800">{t('loading-fusam-conflict-title')}</p>
+                <p className="m-0 mt-1 text-xs leading-5 text-amber-700">{t('loading-fusam-conflict-detail')}</p>
               </div>
             )}
 
@@ -342,7 +361,7 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
   };
 
   private statusText(): string {
-    const {progress, outdated, modsOutdated} = this.state;
+    const {progress, outdated, modsOutdated, fusamConflict} = this.state;
     if (progress.waitingForGame) {
       return t('loading-waiting-game');
     }
@@ -352,6 +371,9 @@ export default class ModLoadingWindow extends Component<{}, ModLoadingWindowStat
       }
       if (modsOutdated) {
         return t('loading-mods-outdated-title');
+      }
+      if (fusamConflict) {
+        return t('loading-fusam-conflict-title');
       }
       return t('loading-complete');
     }

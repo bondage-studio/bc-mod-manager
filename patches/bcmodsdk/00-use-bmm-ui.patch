@@ -1,5 +1,7 @@
---- a/errors.ts	2026-06-10 20:58:16
-+++ b/errors.ts	2026-06-11 03:08:10
+diff --git a/errors.ts b/errors.ts
+index 67c8a2a..6b816f8 100644
+--- a/errors.ts
++++ b/errors.ts
 @@ -1,5 +1,7 @@
 +import { showSdkAlert } from '@/service/SdkUiService';
 +
@@ -9,32 +11,10 @@
  	const err = new Error(error);
  	console.error(err);
  	throw err;
---- a/sdkApi.ts	2026-06-10 20:56:39
-+++ b/sdkApi.ts	2026-06-11 03:08:10
-@@ -5,6 +5,13 @@
- export let sdkApi: ModSDKGlobalAPI;
- export const API_VERSION: number = 1;
- 
-+// Tracks instances we created so Init() can tell ours from BC's bundled SDK.
-+const _ourInstances = new WeakSet<object>();
-+
-+export function isOurSdkInstance(api: unknown): boolean {
-+	return typeof api === 'object' && api !== null && _ourInstances.has(api as object);
-+}
-+
- export function CreateGlobalAPI(): ModSDKGlobalAPI {
- 	const result: ModSDKGlobalAPI = {
- 		version: VERSION,
-@@ -19,6 +26,7 @@
- 		}),
- 	};
- 
-+	_ourInstances.add(result);
- 	sdkApi = result;
- 
- 	return Object.freeze(result);
---- a/index.ts	2026-06-10 20:58:16
-+++ b/index.ts	2026-06-11 03:40:41
+diff --git a/index.ts b/index.ts
+index 03985f9..63dca00 100644
+--- a/index.ts
++++ b/index.ts
 @@ -1,20 +1,45 @@
  import { ThrowError } from './errors';
  import type { ModSDKGlobalAPI } from './api';
@@ -83,16 +63,18 @@
  			`Mod SDK warning: Loading different but compatible versions ('${VERSION}' vs '${window.bcModSdk.version}')\n` +
  			'One of mods you are using is using an old version of SDK. It will work for now but please inform author to update',
  		);
-@@ -38,4 +63,4 @@
+@@ -38,4 +63,4 @@ if (typeof exports !== 'undefined') {
  /** @public */
  export default bcModSdk;
  
 -export * from './api';
 +export * from './api';
 \ No newline at end of file
---- a/patching.ts	2026-06-10 17:25:36
-+++ b/patching.ts	2026-06-11 03:56:16
-@@ -5,6 +5,7 @@
+diff --git a/patching.ts b/patching.ts
+index 96a0b7c..f042ed1 100644
+--- a/patching.ts
++++ b/patching.ts
+@@ -5,6 +5,7 @@ import { PatchedFunctionInfo, PatchHook } from './api';
  import { registeredMods } from './modRegistry';
  import { sdkApi } from './sdkApi';
  import { ArrayUnique, CRC32, IsObject } from './utils';
@@ -100,7 +82,82 @@
  
  export interface IHookData {
  	readonly mod: string;
-@@ -94,9 +95,18 @@
+@@ -43,6 +44,74 @@ function WarnUnique(warning: string): void {
+ 	console.warn(warning);
+ }
+ 
++const MAX_ARG_PREVIEW = 300;
++
++/** Produce a short, safe, human-readable preview of a single function argument. */
++function DescribeArg(value: any): string {
++	try {
++		if (value === undefined)
++			return 'undefined';
++		if (value === null)
++			return 'null';
++		const type = typeof value;
++		if (type === 'string') {
++			const s = JSON.stringify(value) ?? '"…"';
++			return s.length > MAX_ARG_PREVIEW ? `${s.slice(0, MAX_ARG_PREVIEW)}…"` : s;
++		}
++		if (type === 'number' || type === 'boolean' || type === 'bigint' || type === 'symbol')
++			return String(value);
++		if (type === 'function')
++			return `function ${value.name || '(anonymous)'}`;
++		// HTMLElement / Node — avoid serializing the whole DOM tree.
++		if (typeof HTMLElement !== 'undefined' && value instanceof HTMLElement)
++			return `<${value.tagName.toLowerCase()}${value.id ? ` #${value.id}` : ''}>`;
++		if (Array.isArray(value)) {
++			const preview = JSON.stringify(value, MakeSafeReplacer(), 0);
++			const base = `Array(${value.length})`;
++			if (!preview)
++				return base;
++			return preview.length > MAX_ARG_PREVIEW ? `${base} ${preview.slice(0, MAX_ARG_PREVIEW)}…` : `${base} ${preview}`;
++		}
++		// Recognise common BC objects by their identifying fields without dumping them.
++		if (type === 'object') {
++			if (typeof value.MemberNumber === 'number')
++				return `Character(${value.MemberNumber}${value.Name ? ` ${value.Name}` : ''})`;
++			const ctor = value.constructor?.name;
++			const preview = JSON.stringify(value, MakeSafeReplacer()) ?? '';
++			const base = ctor && ctor !== 'Object' ? ctor : 'Object';
++			if (!preview)
++				return base;
++			return preview.length > MAX_ARG_PREVIEW ? `${base} ${preview.slice(0, MAX_ARG_PREVIEW)}…` : `${base} ${preview}`;
++		}
++		return String(value);
++	} catch {
++		return '(unserializable)';
++	}
++}
++
++/** JSON.stringify replacer that drops circular refs and overly large/unsafe values. */
++function MakeSafeReplacer(): (key: string, value: any) => any {
++	const seen = new WeakSet();
++	return (_key, value) => {
++		if (typeof value === 'function')
++			return `[function ${value.name || ''}]`;
++		if (typeof value === 'bigint')
++			return `${value}n`;
++		if (value && typeof value === 'object') {
++			if (seen.has(value))
++				return '[circular]';
++			seen.add(value);
++			if (typeof HTMLElement !== 'undefined' && value instanceof HTMLElement)
++				return `[<${value.tagName.toLowerCase()}>]`;
++		}
++		return value;
++	};
++}
++
++function SerializeArgs(args: any[]): string[] {
++	return args.map(DescribeArg);
++}
++
+ function MakePatchRouter(data: IPatchedFunctionData): (...args: any[]) => any {
+ 	return function modSDKPatchRouter(this: any, ...args: any[]) {
+ 		// Mod SDK Function hook
+@@ -94,9 +163,23 @@ function UpdatePatchedFunction(data: IPatchedFunctionDataBase): IPatchedFunction
  
  	let next: (this: any, nextargs: any[]) => any = function (args) {
  		const onExit = sdkApi.errorReporterHooks.hookChainExit?.(data.name, patchesSources);
@@ -116,13 +173,18 @@
 +			// clears its context — preventing double-reporting via window.onerror.
 +			onExit?.();
 +			const modList = Array.from(patchesSources).join(', ') || '(unknown)';
-+			reportSdkCrash('patch', data.name, modList, err);
++			reportSdkCrash('patch', data.name, modList, err, {
++				hookedByMods: ArrayUnique(hooks.map((h) => h.mod)),
++				patchedByMods: Array.from(patchesSources),
++				args: SerializeArgs(args),
++				patchSummary: GetPatchSummary(),
++			});
 +			throw err;
 +		}
  	};
  
  	for (let i = hooks.length - 1; i >= 0; i--) {
-@@ -105,14 +115,22 @@
+@@ -105,14 +188,27 @@ function UpdatePatchedFunction(data: IPatchedFunctionDataBase): IPatchedFunction
  
  		next = function (args) {
  			const onExit = sdkApi.errorReporterHooks.hookEnter?.(data.name, hook.mod);
@@ -145,7 +207,12 @@
 +				return resIntermediate;
 +			} catch (err) {
 +				onExit?.();
-+				reportSdkCrash('hook', data.name, hook.mod, err);
++				reportSdkCrash('hook', data.name, hook.mod, err, {
++					hookedByMods: ArrayUnique(hooks.map((h) => h.mod)),
++					patchedByMods: Array.from(patchesSources),
++					args: SerializeArgs(args),
++					patchSummary: GetPatchSummary(),
++				});
 +				// Skip the crashed hook and continue the chain so BC keeps running.
 +				// Not re-throwing also prevents any outer crash handler from double-reporting.
 +				return nextHook.call(this, args);
@@ -153,3 +220,59 @@
  		};
  	}
  
+@@ -172,6 +268,29 @@ export function UpdateAllPatches(): void {
+ 	}
+ }
+ 
++export interface PatchSummaryEntry {
++	readonly name: string;
++	readonly hookedByMods: string[];
++	readonly patchedByMods: string[];
++}
++
++/**
++ * Lightweight snapshot of every currently-patched function and which mods touch
++ * it. Used to annotate crash stack traces — kept free of functions/objects so it
++ * can be passed straight into the crash store.
++ */
++export function GetPatchSummary(): PatchSummaryEntry[] {
++	const result: PatchSummaryEntry[] = [];
++	for (const [name, data] of patchedFunctions) {
++		const hookedByMods = ArrayUnique(data.precomputed.hooks.map((h) => h.mod));
++		const patchedByMods = Array.from(data.precomputed.patchesSources);
++		if (hookedByMods.length === 0 && patchedByMods.length === 0)
++			continue;
++		result.push({ name, hookedByMods, patchedByMods });
++	}
++	return result;
++}
++
+ export function GetPatchedFunctionsInfo(): Map<string, PatchedFunctionInfo> {
+ 	const result: Map<string, PatchedFunctionInfo> = new Map();
+ 	for (const [name, data] of patchedFunctions) {
+diff --git a/sdkApi.ts b/sdkApi.ts
+index 56204a3..b38cbdb 100644
+--- a/sdkApi.ts
++++ b/sdkApi.ts
+@@ -5,6 +5,13 @@ import { GetPatchedFunctionsInfo } from './patching';
+ export let sdkApi: ModSDKGlobalAPI;
+ export const API_VERSION: number = 1;
+ 
++// Tracks instances we created so Init() can tell ours from BC's bundled SDK.
++const _ourInstances = new WeakSet<object>();
++
++export function isOurSdkInstance(api: unknown): boolean {
++	return typeof api === 'object' && api !== null && _ourInstances.has(api as object);
++}
++
+ export function CreateGlobalAPI(): ModSDKGlobalAPI {
+ 	const result: ModSDKGlobalAPI = {
+ 		version: VERSION,
+@@ -19,6 +26,7 @@ export function CreateGlobalAPI(): ModSDKGlobalAPI {
+ 		}),
+ 	};
+ 
++	_ourInstances.add(result);
+ 	sdkApi = result;
+ 
+ 	return Object.freeze(result);

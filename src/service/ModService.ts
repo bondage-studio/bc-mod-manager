@@ -4,6 +4,8 @@ import {ModLoaderService} from '@/service/ModLoaderService';
 import {CustomExtensionService} from '@/service/CustomExtensionService';
 import {currentLanguage} from '@/i18n/i18n';
 import {formatLocalizedName, formatLocalizedText} from '@/util/format';
+import {Observable} from '@/infrastructure/pubsub/Observable';
+import {Logger} from '@/infrastructure/logging/Logger';
 import type {ModConfig, ModWithDetails} from '@/domain/Mod';
 import type {CachedRegistryData, FusamAddon} from '@/domain/Registry';
 
@@ -14,6 +16,23 @@ import type {CachedRegistryData, FusamAddon} from '@/domain/Registry';
  */
 export class ModService {
   private static readonly repo = new ModConfigRepository();
+  private static readonly observable = new Observable<ModConfig[]>({
+    emitOnSubscribe: false,
+    onListenerError: (error) => Logger.error('ModService: listener threw', error),
+  });
+
+  /**
+   * Subscribe to mod-configuration changes (install / enable / version / remove).
+   * The listener receives the full config list on each change. Returns an
+   * unsubscribe function.
+   */
+  static subscribe(listener: (configs: ModConfig[]) => void): () => void {
+    return this.observable.subscribe(listener);
+  }
+
+  private static notifyChange(): void {
+    this.observable.notify(this.getAllConfigs());
+  }
 
   /**
    * Get all mod configurations
@@ -42,6 +61,7 @@ export class ModService {
       : {...config, installedAt: now, updatedAt: now};
 
     this.repo.upsert(savedConfig);
+    this.notifyChange();
     return savedConfig;
   }
 
@@ -84,7 +104,11 @@ export class ModService {
       ModLoaderService.markModDisabled(modId, registryId);
     }
 
-    return this.repo.removeByKey(`${modId}_${registryId}`);
+    const removed = this.repo.removeByKey(`${modId}_${registryId}`);
+    if (removed) {
+      this.notifyChange();
+    }
+    return removed;
   }
 
   /**
@@ -269,5 +293,6 @@ export class ModService {
    */
   static clearAll(): void {
     this.repo.clear();
+    this.notifyChange();
   }
 }

@@ -25,7 +25,7 @@ export class RegistryService {
     },
     {
       id: 'inkerbot',
-      url: 'https://inkerbot.github.io/bc-mod-manager/manifest.json',
+      url: 'https://bondage-studio.github.io/bc-mod-manager/manifest.json',
       type: 'fusam',
       createdAt: Date.parse('2025-10-16T00:00:00Z'),
       updatedAt: Date.parse('2025-10-16T00:00:00Z'),

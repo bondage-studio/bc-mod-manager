@@ -1,0 +1,28 @@
+name: Notify site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mint installation token from the GitHub App
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.SITE_DISPATCH_APP_ID }}
+          private-key: ${{ secrets.SITE_DISPATCH_APP_PRIVATE_KEY }}
+          owner: bondage-studio
+          repositories: bondage-studio.github.io # scope the token to the target only
+
+      - name: Trigger site rebuild
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: bondage-studio/bondage-studio.github.io
+          event-type: sync-docs

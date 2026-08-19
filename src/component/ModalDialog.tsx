@@ -57,7 +57,7 @@ export default class ModalDialog extends Component<ModalDialogProps, ModalDialog
     const otherButtons = Object.entries(buttons).filter(([key]) => key !== "submit");
 
     return (
-      <ModalBackdrop className="z-[60]">
+      <ModalBackdrop className="z-[70]">
         <DialogPanel>
           <CloseButton
             onClick={() => this.handleAction("close")}

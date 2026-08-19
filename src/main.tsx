@@ -9,8 +9,11 @@ import {ModService} from "@/service/ModService.ts";
 import {RegistryService} from "@/service/RegistryService.ts";
 import {RegistryDataService} from "@/service/RegistryDataService.ts";
 import {ModLoaderService} from "@/service/ModLoaderService.ts";
+import {FusamMigrationService} from "@/service/FusamMigrationService.ts";
+import {PlatformApiService} from "@/service/PlatformApiService.ts";
+import {PlatformBridge} from "@/infrastructure/bridge/PlatformBridge.ts";
 
-Logger.info('BC Mod Manager started');
+Logger.info('BC Mod Manager started', {platform: PlatformBridge.info().id});
 
 // fetch all registries and cache data
 RegistryDataService.fetchAllRegistries(RegistryService.getAll())
@@ -24,6 +27,9 @@ RegistryDataService.fetchAllRegistries(RegistryService.getAll())
 // Initialize mod loader to preload enabled mods
 ModLoaderService.initialize();
 ModLoaderService.preloadAllEnabledMods();
+
+// Offer to import a previous FUSAM configuration when BMM has no enabled mods.
+FusamMigrationService.init();
 
 // System Information
 LogService.registerDebugMethod('System Information', () => {
@@ -113,5 +119,9 @@ Logger.debug('Debug methods registered', {
 });
 
 render(<App/>, window.bmm.root);
+
+// Publish the public API (window.bmm.api) and hand it to the embedding host.
+// Done after the app shell mounts so ui.* can drive the live App instance.
+PlatformApiService.install();
 
 ModLoaderService.loadAllEnabledMods();

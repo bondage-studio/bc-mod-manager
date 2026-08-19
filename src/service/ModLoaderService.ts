@@ -4,6 +4,8 @@ import {SettingsService} from '@/service/SettingsService';
 import {Logger} from '@/infrastructure/logging/Logger';
 import {Observable} from '@/infrastructure/pubsub/Observable';
 import {ScriptInjector} from '@/infrastructure/dom/ScriptInjector';
+import {PlatformBridge} from '@/infrastructure/bridge/PlatformBridge';
+import {PlatformApiService} from '@/service/PlatformApiService';
 import {BcGameState} from '@/service/BcGameState';
 import type {ModLoadEntry, ModLoadProgress, ModLoadStatus, ModLoadType} from '@/domain/ModLoad';
 
@@ -283,6 +285,13 @@ export class ModLoaderService {
    */
   static refreshIfNeeded(): void {
     if (this.hasDisabledMods) {
+      // When the host owns reloads (embedded view), ask it to reload instead of
+      // navigating the page ourselves.
+      if (PlatformBridge.ui().suppressReload) {
+        Logger.info('ModLoaderService: Mods disabled; host owns reload, emitting reloadRequested');
+        PlatformApiService.emit('reloadRequested', {reason: 'mods-disabled'});
+        return;
+      }
       Logger.info('ModLoaderService: Mods have been disabled, refreshing page...');
       window.location.reload();
     } else {
@@ -406,7 +415,7 @@ export class ModLoaderService {
     onError?: (error: unknown) => void,
   ): Promise<void> {
     try {
-      const response = await fetch(loadUrl);
+      const response = await PlatformBridge.fetch(loadUrl);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

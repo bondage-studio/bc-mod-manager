@@ -3,6 +3,11 @@ declare interface Bmm {
   shadowRoot: ShadowRoot;
   root: HTMLDivElement;
   app: import('@/app.tsx').default;
+  /**
+   * Public, stable API for plugins and third parties. Installed once the app
+   * shell has mounted (see main.tsx); absent before then.
+   */
+  api?: import('@/service/PlatformApiService').BmmApi;
 }
 
 /**
@@ -18,4 +23,5 @@ declare interface BmmLoaderState {
 declare interface Window {
   bmm: Bmm;
   __bmmLoader?: BmmLoaderState;
+  __bmmHost?: import('@/infrastructure/bridge/PlatformBridge').BmmHost;
 }

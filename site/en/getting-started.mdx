@@ -1,0 +1,55 @@
+---
+title: Getting started
+description: Install BC Mod Manager via userscript, bookmarklet, or console, then enable your first mods.
+order: 2
+---
+
+## Install
+
+The recommended way to run BMM is the userscript — it runs automatically on the
+Bondage Club page at `document-start`:
+
+<UserscriptInstall
+  url="https://bondage-studio.github.io/bc-mod-manager/bmm.user.js"
+  name="BC Mod Manager"
+/>
+
+The userscript runs on these Bondage Club domains:
+
+- `bondageprojects.elementfx.com`
+- `bondage-europe.com`
+- `bondage-asia.com`
+
+### Bookmarklet / console
+
+You can also inject BMM temporarily with a bookmarklet or the browser console:
+
+```js
+(_ => {
+  const script = document.createElement("script");
+  script.src = "https://bondage-studio.github.io/bc-mod-manager/main.js";
+  document.head.appendChild(script);
+})()
+```
+
+## Usage
+
+1. Install the userscript, or inject BMM with a bookmarklet / console.
+2. Open Bondage Club.
+3. Click the `BC Mod Manager` floating button on the login or preferences screen.
+4. In **Registry Manager**, refresh the preset registries or add your own.
+5. In **Mod Manager**, search for mods, install them, pick a version, and enable
+   them.
+6. Refresh the page so the enabled state and version choices take effect in a new
+   game session.
+
+> After you remove a mod that was already loaded, BMM refreshes the page when you
+> close the Mod Manager. Most BC mods cannot be fully unloaded once they have
+> run — removing the `<script>` tag alone does not undo their changes to the game
+> runtime.
+
+## Next steps
+
+- [registry-format](registry-format) — understand the manifest BMM reads when you
+  add a custom registry.
+- [development](development) — build from source or contribute.

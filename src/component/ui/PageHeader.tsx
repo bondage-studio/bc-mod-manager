@@ -13,7 +13,7 @@ export default function PageHeader({actions, className, subtitle, title, ...prop
     <div
       {...props}
       className={cn(
-        'mb-5 flex flex-col gap-4 pr-0 sm:flex-row sm:items-start sm:justify-between sm:pr-12',
+        'mb-5 flex flex-col gap-4 pr-12 sm:flex-row sm:items-start sm:justify-between',
         className,
       )}
     >

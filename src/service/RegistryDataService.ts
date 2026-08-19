@@ -1,5 +1,6 @@
 import {RegistryCacheRepository} from '@/repository/RegistryCacheRepository';
 import {Logger} from '@/infrastructure/logging/Logger';
+import {PlatformBridge} from '@/infrastructure/bridge/PlatformBridge';
 import type {AuroraRegistryData, CachedRegistryData, FusamRegistryData, Registry} from '@/domain/Registry';
 
 /**
@@ -33,7 +34,7 @@ export class RegistryDataService {
     try {
       Logger.info(`Fetching registry data from: ${registry.url}`);
 
-      const response = await fetch(registry.url, {
+      const response = await PlatformBridge.fetch(registry.url, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
